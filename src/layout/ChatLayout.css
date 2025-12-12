@@ -1,0 +1,25 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.chat-container {
+    display: flex;
+    overflow-x: hidden;
+    margin-top: 1%;
+
+}
+
+
+.chat-left {
+    width: 30%;
+    margin-left: 3%;
+    margin-right:1%;
+    /* border: 1px solid #ccc;
+    border-radius: 15%; */
+}
+
+.chat-right {
+    width: 70%;
+}
