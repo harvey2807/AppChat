@@ -1,0 +1,21 @@
+.infor{
+    width: 30%;
+    height: 100%;
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inforOtherUser{
+    width: 100%;
+    height: 70%;
+    border-radius: 15px;
+    background-color: white;
+}
+.inforUser{
+    width: 100%;
+    height: 30%;
+    margin-top: 20px;
+    border-radius: 15px;
+    background-color: white;
+}

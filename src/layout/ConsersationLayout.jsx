@@ -1,6 +1,8 @@
 import './ChatLayout.css';
 import Sidebar from '../components/chat/sidebar/sidebar.jsx';
 import ListMess from '../components/chat/messagelist/ListMess.jsx';
+import ChatOtherUser from '../components/chat/chatOtherUser/ChatOtherUser.jsx';
+import InfoChat from '../components/chat/chatOtherUser/InfoChat.jsx';
 
 function ConsersationLayout() {
     return (
@@ -8,10 +10,11 @@ function ConsersationLayout() {
             <div className='chat-left'>
                 <Sidebar /> 
                 <ListMess />
-                
+
             </div>
             <div className='chat-right'>
-                <h1>HELLOooooo</h1>
+                <ChatOtherUser/>
+                <InfoChat/>
             </div>
         </div>
     );
