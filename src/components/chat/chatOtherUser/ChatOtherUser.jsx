@@ -1,13 +1,36 @@
 import './ChatOtherUser.css'
+import { useRef } from 'react'
 
 const userName = "duy"
 
-function ChatOtherUser() {
+function ChatOtherUser({onSend}) {
+    const textareaRef = useRef(null)
+    const MAX_HEIGHT = 140
     const messages = [{ "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
     { "id": 11076, "name": "duy", "type": 0, "to": "tttt", "mes": "Ok luôn bạn ê.", "createAt": "2025-12-12 07:31:09" },
     { "id": 11075, "name": "duy", "type": 0, "to": "tttt", "mes": "Mà cho tôi cái lịch đi bạn ơi.", "createAt": "2025-12-12 07:35:09" }]
 
-    
+    const handleInput = () => {
+        const el = textareaRef.current
+        el.style.height = 'auto'
+
+        if (el.scrollHeight <= MAX_HEIGHT) {
+            el.style.height = el.scrollHeight + "px";
+            el.style.overflowY = "hidden";
+        } else {
+            el.style.height = MAX_HEIGHT + "px";
+            el.style.overflowY = "auto";
+        }
+    }
+    const handleKeyDown = (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            onSend?.(textareaRef.current.value);
+            textareaRef.current.value = "";
+            textareaRef.current.style.height = "40px";
+        }
+    };
+
     return (
         <div className="chat-box">
             <div className="chat-box-header">
@@ -22,11 +45,16 @@ function ChatOtherUser() {
             <div className="chat-input">
                 <button className='image-btn' />
                 <button className='file-btn' />
-                <form class="form-chat" role="chat">
-                    <input className="chat-text" type="chat" placeholder='Nhập tin nhắn . . .' />
+                <div class="form-chat">
+                    <textarea className="chat-text" 
+                    ref={textareaRef}
+                    rows="1" 
+                    onInput={handleInput}
+                    onKeyDown={handleKeyDown}
+                    placeholder='Nhập tin nhắn . . .' />
                     <button className='icon-btn file-btn' />
-                    <button className="send-btn file-btn" type="submit"></button>
-                </form>
+                    <button className="send-btn file-btn"></button>
+                </div>
             </div>
         </div>
     )

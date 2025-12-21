@@ -1,7 +1,8 @@
-p{
+p {
     margin: 0;
 }
-.infor{
+
+.infor {
     width: 30%;
     height: 100%;
     margin-left: 20px;
@@ -9,21 +10,23 @@ p{
     flex-direction: column;
 }
 
-.inforOtherUserBox{
+.inforOtherUserBox {
     width: 100%;
     height: 70%;
     border-radius: 15px;
     background-color: white;
 }
-.inforOtherUser{
+
+.inforOtherUser {
     width: 100%;
-    height: 35%;
+    height: 130px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
-.avt-o{
+
+.avt-o {
     width: 60px;
     height: 60px;
     margin: 5px 10px 5px 10px;
@@ -32,7 +35,8 @@ p{
     background-image: url("../../../assets/images/icon-person.png");
     background-size: cover;
 }
-.media-box{
+
+.media-box {
     width: 100%;
     height: 65%;
     display: flex;
@@ -40,6 +44,7 @@ p{
     justify-content: center;
     align-items: center;
 }
+
 .btn-box {
     width: 100%;
     height: 26px;
@@ -48,7 +53,8 @@ p{
     justify-content: center;
     align-items: center;
 }
-.btn-media{
+
+.btn-media {
     width: 60px;
     border-radius: 5px 5px 0 0;
     border: solid 1px gray;
@@ -56,34 +62,40 @@ p{
     padding: 0;
     margin-right: 10px;
 }
-.chose{
+
+.chose {
     background-color: cyan;
 }
-.media{
+
+.media {
     width: 100%;
     height: 90%;
     position: relative;
     border-top: solid 1px gray;
-    padding: 10px 30px ;
+    padding: 10px 30px;
 }
-.image-box{
+
+.image-box {
     width: 90%;
-    height: 70px; 
-    margin-left: 0; 
+    height: 70px;
+    margin-left: 0;
     position: absolute;
     top: 10px;
     left: 12px;
 }
-.img{
+
+.img {
     padding: 0 3px;
     margin-bottom: 6px;
 }
-img{
+
+img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
-.file-box{
+
+.file-box {
     width: 100%;
     height: 100%;
     padding: 10px;
@@ -92,7 +104,7 @@ img{
     left: 0;
 }
 
-.file{
+.file {
     width: 100%;
     height: 30px;
     display: flex;
@@ -100,7 +112,8 @@ img{
     align-items: center;
     position: relative;
 }
-.file-icon{
+
+.file-icon {
     width: 20px;
     height: 20px;
     background-color: white;
@@ -108,18 +121,15 @@ img{
     background-size: cover;
     margin-right: 20px;
 }
+
 .file-name {
-  max-width: 100px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+    max-width: 100px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
-@media (max-width: 992px) {
-  .file-name {
-    max-width: 50px;
-  }
-}
-.download-btn{
+
+.download-btn {
     width: 20px;
     height: 20px;
     border: none;
@@ -131,13 +141,16 @@ img{
     top: 5px;
     right: 20px;
 }
-.show{
+
+.show {
     visibility: visible;
 }
-.hidden{
+
+.hidden {
     visibility: hidden;
 }
-.inforUserBox{
+
+.inforUserBox {
     width: 100%;
     height: 30%;
     margin-top: 20px;
@@ -148,10 +161,12 @@ img{
     justify-content: center;
     align-items: center;
 }
-.avt-u{
+
+.avt-u {
     background-image: url('../../../assets/images/user.png');
 }
-.logout-btn{
+
+.logout-btn {
     padding: 3px 5px 3px 5px;
     background-color: red;
     border-radius: 5px;
@@ -159,4 +174,103 @@ img{
     color: white;
     border: none;
     margin-top: 20px;
+}
+
+.more-info-btn {
+    display: none;
+}
+.info-u-btn{
+    display: none;
+}
+/* .sidebar{
+    width: 10%;
+    margin-left: 5px;
+    display: flex;
+    flex-direction: column;
+} */
+.inforUserBoxMobile {
+    width: 30%;
+    height: 40%;
+    margin-top: 20px;
+    border-radius: 15px;
+    background-color: white;
+    border: solid 1px black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    right: 50px;
+    z-index: 100;
+}
+.inforUserBoxMobile .logout-btn{
+    margin-top: 2px;
+}
+.inforOtherUserBoxMobile{
+    width: 30%;
+    height: 90%;
+    border-radius: 15px;
+    background-color: white;
+    position: absolute;
+    right: 50px;
+    z-index: 100;
+    border: solid 1px black;
+}
+.inforOtherUserBoxMobile .inforOtherUser{
+    height: 50px;
+}
+.inforOtherUserMobile{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    margin: 5px 0;
+}
+.avt-mobile{
+    width: 20px;
+    height: 20px;
+    background-image: url("../../../assets/images/icon-person.png");
+    background-size: cover;
+    border: solid 1px black;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+@media (max-width : 992px) {
+    .file-name {
+        max-width: 50px;
+    }   
+
+    .infor{
+        display: none;
+    }
+
+    .sidebar {
+        width: 9%;
+        height: 80px;
+        background-color: white;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-left: 10px;
+    }
+
+    .more-info-btn,
+    .info-u-btn {
+        display: block;
+        width: 20px;
+        height: 20px;
+        border: none;
+        background-color: white;
+        background-image: url("../../../assets/images/more.png");
+        background-size: cover;
+        margin-bottom: 5px;
+        z-index: 2;
+    }
+    .info-u-btn{
+        background-image: url("../../../assets/images/user.png");
+    }
+
 }

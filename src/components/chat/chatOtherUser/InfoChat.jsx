@@ -1,7 +1,11 @@
 import './InfoChat.css'
 import { useState } from 'react'
+import useMediaQuery from '../../../hooks/useMediaQuery';
 
 function InfoChat() {
+    const isMobile = useMediaQuery("(max-width: 992px)");
+    const [showInforChat, setShowInforChat] = useState(false);
+    const [showInforUser, setShowInforUser] = useState(false);
     const [choseMedia, setChoseMedia] = useState(0)
 
     const changeMedia = () => {
@@ -23,56 +27,118 @@ function InfoChat() {
     ]
 
     return (
-        <div className="infor">
-            <div className='inforOtherUserBox'>
-                <div className="inforOtherUser">
-                    <div className="avt-o"></div>
-                    <p>Tên người dùng</p>
+        <>
+            {isMobile && (
+                <div className='sidebar'>
+                    <button className="more-info-btn" onClick={() => {setShowInforChat(!showInforChat); setShowInforUser(false)}} />
+                    <button className="info-u-btn" onClick={() => {setShowInforUser(!showInforUser) ; setShowInforChat(false)}} />
                 </div>
-                <div className="media-box">
-                    <div className="btn-box">
-                        <button onClick={changeMedia}
-                            className='btn-media chose'
-                            style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
-                        >Ảnh</button>
-                        <button onClick={changeMedia}
-                            className='btn-media'
-                            style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
-                        >File</button>
-                    </div>
-                    <div className="media">
-                        <div className="image-box row gx-3"
-                            style={
-                                { visibility: choseMedia === 0 ? "visible" : "hidden" }
-                            }>
-                            {images.map((url, index) => (
-                                <div className="col-4 img">
-                                    <img key={index} src={url} alt={`img-${index}`} />
-                                </div>
-                            ))}
+            )}
+            {!isMobile && (
+                <div className="infor">
+                    <div className='inforOtherUserBox'>
+                        <div className="inforOtherUser">
+                            <div className="avt-u avt"></div>
+                            <p>Tên người dùng</p>
                         </div>
-                        <div className="file-box"
-                            style={
-                                { visibility: choseMedia === 1 ? "visible" : "hidden" }
-                            }>
-                            {files.map((filename) => (
-                                <div className="file">
-                                    <div className="file-icon"></div>
-                                    <p className='file-name'>{filename}</p>
-                                    <button className="download-btn" />
+                        <div className="media-box">
+                            <div className="btn-box">
+                                <button onClick={changeMedia}
+                                    className='btn-media chose'
+                                    style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
+                                >Ảnh</button>
+                                <button onClick={changeMedia}
+                                    className='btn-media'
+                                    style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
+                                >File</button>
+                            </div>
+                            <div className="media">
+                                <div className="image-box row gx-3"
+                                    style={
+                                        { visibility: choseMedia === 0 ? "visible" : "hidden" }
+                                    }>
+                                    {images.map((url, index) => (
+                                        <div className="col-4 img">
+                                            <img key={index} src={url} alt={`img-${index}`} />
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
+                                <div className="file-box"
+                                    style={
+                                        { visibility: choseMedia === 1 ? "visible" : "hidden" }
+                                    }>
+                                    {files.map((filename) => (
+                                        <div className="file">
+                                            <div className="file-icon"></div>
+                                            <p className='file-name'>{filename}</p>
+                                            <button className="download-btn" />
+                                        </div>
+                                    ))}
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='inforUserBox'>
+                        <div className="avt avt-u"></div>
+                        <p>Tên người dùng</p>
+                        <button className='logout-btn'>Đăng xuất</button>
+                    </div>
+                </div>
+            )}
+            {isMobile && showInforChat && (
+                <div className='inforOtherUserBoxMobile'>
+                    <div className="inforOtherUserMobile">
+                        <div className="avt-u avt-mobile"></div>
+                        <p>Tên người dùng</p>
+                    </div>
+                    <div className="media-box">
+                        <div className="btn-box">
+                            <button onClick={changeMedia}
+                                className='btn-media chose'
+                                style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
+                            >Ảnh</button>
+                            <button onClick={changeMedia}
+                                className='btn-media'
+                                style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
+                            >File</button>
+                        </div>
+                        <div className="media">
+                            <div className="image-box row gx-3"
+                                style={
+                                    { visibility: choseMedia === 0 ? "visible" : "hidden" }
+                                }>
+                                {images.map((url, index) => (
+                                    <div className="col-4 img">
+                                        <img key={index} src={url} alt={`img-${index}`} />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="file-box"
+                                style={
+                                    { visibility: choseMedia === 1 ? "visible" : "hidden" }
+                                }>
+                                {files.map((filename) => (
+                                    <div className="file">
+                                        <div className="file-icon"></div>
+                                        <p className='file-name'>{filename}</p>
+                                        <button className="download-btn" />
+                                    </div>
+                                ))}
+
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div className='inforUserBox'>
-                <div className="avt avt-u"></div>
-                <p>Tên người dùng</p>
-                <button className='logout-btn'>Đăng xuất</button>
-            </div>
-        </div>
+            )}
+            {isMobile && showInforUser && (
+                <div className='inforUserBoxMobile'>
+                    <div className="avt avt-u"></div>
+                    <p>Tên người dùng</p>
+                    <button className='logout-btn'>Đăng xuất</button>
+                </div>
+            )}
+        </>
     )
 }
 

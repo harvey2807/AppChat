@@ -3,11 +3,13 @@
     height: 100%;
     border-radius: 15px;
     background-color: white;
+    display: flex;
+    flex-direction: column;
 }
 
 .chat-box-header {
     width: 100%;
-    height: 10%;
+    height: 52px;
     border-bottom: solid 1px gray;
     display: flex;
     align-items: center;
@@ -95,28 +97,34 @@
     transform: translateY(0);
 }
 
+.time-send:hover {
+    opacity: 0 !important;
+    transform: none !important;
+}
+
 .chat-input {
     width: 100%;
-    height: 10%;
+    height: 52px;
     border-top: solid 1px black;
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
+    justify-content: center;
+    margin-top: auto;
     padding: 1px 5px 1px 5px;
 }
 
 .image-btn,
 .file-btn {
-    width: 7%;
-    height: 80%;
+    width: 30px;    
+    height: 30px;
     background-color: white;
     background-image: url('../../../assets/images/imageicon.png');
     background-size: cover;
     border: none;
-    margin-left: 5px;
-    margin-right: 5px;
+    margin: 0 5px 10px 5px;
     background-position: center;
 }
 
@@ -129,26 +137,39 @@
     height: 90%;
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-end;
+    justify-content: center;
+    margin-bottom: 8px;
 }
 
 .chat-text {
     width: 85%;
-    height: 80%;
+    height: 76%;
+    resize: none;
+    overflow: hidden;
+    font-size: 100%;
+    line-height: 1.4;
     border: solid 1px gray;
     border-radius: 15px;
-    padding: 10px;
+    padding: 8px;
 }
 
 .icon-btn {
-    width: 6%;
-    height: 70%;
+    width: 30px;    
+    height: 30px;
+    margin-bottom: 4px;
     background-image: url('../../../assets/images/emoji.png');
 }
 
 .send-btn {
-    width: 6%;
-    height: 80%;
+    width: 30px;    
+    height: 30px;
+    margin-bottom: 3px;
     background-image: url('../../../assets/images/send.png');
     background-size: contain;
+}
+@media (max-width: 992px) {
+    .chat-box{
+        width: 95%;
+    }
 }
