@@ -1,14 +1,17 @@
 import './ChatOtherUser.css'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 const userName = "duy"
 
-function ChatOtherUser({onSend}) {
+function ChatOtherUser({ room }) {
     const textareaRef = useRef(null)
     const MAX_HEIGHT = 140
-    const messages = [{ "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
-    { "id": 11076, "name": "duy", "type": 0, "to": "tttt", "mes": "Ok luôn bạn ê.", "createAt": "2025-12-12 07:31:09" },
-    { "id": 11075, "name": "duy", "type": 0, "to": "tttt", "mes": "Mà cho tôi cái lịch đi bạn ơi.", "createAt": "2025-12-12 07:35:09" }]
+    const messages = [
+        { "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
+        { "id": 11076, "name": "duy", "type": 0, "to": "tttt", "mes": "Ok luôn bạn ê.", "createAt": "2025-12-12 07:31:09" },
+        { "id": 11075, "name": "duy", "type": 0, "to": "tttt", "mes": "Mà cho tôi cái lịch đi bạn ơi.", "createAt": "2025-12-12 07:35:09" },
+        { "id": 11074, "name": "tttt", "type": 0, "to": "duy", "mes": "Tầm 7h chỗ cũ nha.", "createAt": "2025-12-12 07:31:12" },
+    ]
 
     const handleInput = () => {
         const el = textareaRef.current
@@ -25,41 +28,52 @@ function ChatOtherUser({onSend}) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            onSend?.(textareaRef.current.value);
+            // onSend?.(textareaRef.current.value);
             textareaRef.current.value = "";
             textareaRef.current.style.height = "40px";
         }
     };
 
     return (
-        <div className="chat-box">
-            <div className="chat-box-header">
-                <button className='avt' />
-                <text className='user-name'>Nguoi dung khac</text>
-            </div>
-            <div className="main-chat">
-                {messages.map(msg => (
-                    Message(msg)
-                ))}
-            </div>
-            <div className="chat-input">
-                <button className='image-btn' />
-                <button className='file-btn' />
-                <div class="form-chat">
-                    <textarea className="chat-text" 
-                    ref={textareaRef}
-                    rows="1" 
-                    onInput={handleInput}
-                    onKeyDown={handleKeyDown}
-                    placeholder='Nhập tin nhắn . . .' />
-                    <button className='icon-btn file-btn' />
-                    <button className="send-btn file-btn"></button>
+        <>
+            <div className="chat-box">
+                {room && (
+                    <div className="chat-box-header">
+                        <button className='room-avt' />
+                        <text className='user-name'>Tên phòng</text>
+                    </div>
+                )}
+                {!room && (
+                    <div className="chat-box-header">
+                        <button className='avt' />
+                        <text className='user-name'>Người dùng khác</text>
+                    </div>
+                )}
+
+                <div className="main-chat">
+                    {messages.map(msg => (
+                        Message(msg, room)
+                    ))}
+                </div>
+                <div className="chat-input">
+                    <button className='image-btn' />
+                    <button className='file-btn' />
+                    <div class="form-chat">
+                        <textarea className="chat-text"
+                            ref={textareaRef}
+                            rows="1"
+                            onInput={handleInput}
+                            onKeyDown={handleKeyDown}
+                            placeholder='Nhập tin nhắn . . .' />
+                        <button className='icon-btn file-btn' />
+                        <button className="send-btn file-btn"></button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     )
 }
-function Message(msg) {
+function Message(msg, room) {
     if (msg.name === userName) {
         return (
             <div className="message me">
@@ -76,11 +90,14 @@ function Message(msg) {
         return (
             <div className="message other">
                 <button className='avt' style={{ width: 15, height: 15 }} />
-                <div className="message-content">
-                    <p>{msg.mes}</p>
-                    <span className="time-send">
-                        {msg.createAt}
-                    </span>
+                <div className="message-box">
+                    {room && (<p className='sender-mess'>Duy đã gửi tin nhắn</p>)}
+                    <div className="message-content">
+                        <p>{msg.mes}</p>
+                        <span className="time-send">
+                            {msg.createAt}
+                        </span>
+                    </div>
                 </div>
             </div>
         )

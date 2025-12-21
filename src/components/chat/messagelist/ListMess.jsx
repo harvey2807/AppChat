@@ -1,11 +1,10 @@
 import './ListMess.css';
 
-
 function ListMess() {
     return (
         <div className="chat-list bg-white">
             <div className="list-group list-group-flush">
-                <a href="#" className="list-group-item list-group-item-action py-3 active-chat">
+                <a href="#" className="list-group-item list-group-item-action active-chat">
                     <div className="d-flex w-100 align-items-center justify-content-between">
                         <div className="d-flex align-items-center">
                             <div className="avatar me-3"></div> <div>
@@ -19,7 +18,7 @@ function ListMess() {
                     </div>
                 </a>
 
-                <a href="#" className="list-group-item list-group-item-action py-3">
+                <a href="#" className="list-group-item list-group-item-action">
                     <div className="d-flex w-100 align-items-center justify-content-between">
                         <div className="d-flex align-items-center">
                             <div className="avatar me-3"></div>
