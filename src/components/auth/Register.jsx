@@ -1,11 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css';
+import './Register.css';
 
-function Login() {
+function Register() {
     const navigate = useNavigate();
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
+    const [confirmPassword, setConfirmPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
 
@@ -14,46 +15,41 @@ function Login() {
         setLoading(true);
         setError('');
 
-        try{
-            const response = await fetch('/api/login', {
+        if (password !== confirmPassword) {
+            setError('Passwords do not match!');
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({username, password}),
+                body: JSON.stringify({ username, password }),
             });
 
             if (response.ok) {
-                // Handle successful login
-                console.log('Login successful');
-                // Store token
-                if (data.token) {
-                    localStorage.setItem('authToken', data.token);
-                }
-                // Redirect
-                navigate('/');
-
+                console.log('Registration successful');
+                navigate('/login');
             } else {
-                // Handle login error
-                console.log('Login failed');
+                const data = await response.json();
+                setError(data.message || 'Registration failed');
             }
-
-            const data = await response.json();
-            console.log('Login ok', data);
-            // Further processing based on response data here
-        }catch(err){
-            console.error('Error during login:', err);
-            setError('An error occurred during login. Please try again!', err);
-        }finally{
+        } catch (err) {
+            console.error('Error during registration:', err);
+            setError('An error occurred during registration. Please try again!');
+        } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="login-page">
-            <div className="login-container">
+        <div className="register-page">
+            <div className="register-container">
                 <form onSubmit={handleSubmit}>
-                    <h1>Login</h1>
+                    <h1>Register</h1>
 
                     {error && <div className="error-message">{error}</div>}
 
@@ -81,14 +77,26 @@ function Login() {
                         />
                     </div>
 
+                    <div className="form-group">
+                        <label htmlFor="confirmPassword">Confirm Password:</label>
+                        <input
+                            id="confirmPassword"
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
                     <button type="submit" disabled={loading}>
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? 'Registering...' : 'Register'}
                     </button>
-                    <a href="/register" className="switch-link">Don't have an account? Register</a>
+                    <a href="/login">Already have an account? Login here.</a>
                 </form>
             </div>
         </div>
     );
 }
 
-export  default Login;
+export default Register;

@@ -5,6 +5,8 @@ import Sidebar from './components/chat/sidebar/sidebar.jsx';
 import ConsersationLayout from './layout/ConsersationLayout.jsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from './components/auth/Login.jsx';
+import Register from './components/auth/Register.jsx';
+
 function App() {
   return (
     // <div className="App">
@@ -28,6 +30,7 @@ function App() {
     <Router>
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/*" element={<ConsersationLayout />} />
         </Routes>
     </Router>
