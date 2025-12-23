@@ -23,6 +23,8 @@ function Login() {
                 body: JSON.stringify({username, password}),
             });
 
+            const data = await response.json();
+
             if (response.ok) {
                 // Handle successful login
                 console.log('Login successful');
@@ -32,18 +34,19 @@ function Login() {
                 }
                 // Redirect
                 navigate('/');
-
             } else {
                 // Handle login error
                 console.log('Login failed');
+                setError(data.message || 'Login failed. Please check your credentials.');
             }
 
-            const data = await response.json();
             console.log('Login ok', data);
+
             // Further processing based on response data here
+
         }catch(err){
             console.error('Error during login:', err);
-            setError('An error occurred during login. Please try again!', err);
+            setError('An error occurred during login. Please try again!');
         }finally{
             setLoading(false);
         }
