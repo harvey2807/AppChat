@@ -90,8 +90,8 @@
     min-width: 85px;
     padding: 3px;
     border: solid 1px black;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
+    background-color: var(--bg-time-send);
+    color: var(--text-time-send);
     border-radius: 10px;
     font-size: 10px;
     bottom: -25px;

@@ -1,10 +1,12 @@
 import './InfoChat.css'
-import { use, useState } from 'react'
+import { use, useContext, useState } from 'react'
 import useMediaQuery from '../../../hooks/useMediaQuery';
 import toggleDown from '../../../assets/images/toggledown.png'
 import toggleUp from '../../../assets/images/upload.png'
-
-function InfoChat({ room , chatId }) {
+import downloadDarkBtn from '../../../assets/images/download.png'
+import downloadLightBtn from '../../../assets/images/download-light.png'
+import { ThemeContext } from '../../../context/ThemeContext';
+function InfoChat({ room, chatId }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
     const [showInforUser, setShowInforUser] = useState(false);
@@ -29,6 +31,8 @@ function InfoChat({ room , chatId }) {
         "bikieptangai.pdf",
         "cuu_am_chan_kinh.pdf"
     ]
+
+    const { theme, toggleTheme } = useContext(ThemeContext)
 
     const listMem = [{ "name": "Duy" }, { "name": "Toan" }, { "name": "Luc" }]
 
@@ -121,7 +125,8 @@ function InfoChat({ room , chatId }) {
                                                 <div className="file">
                                                     <div className="file-icon"></div>
                                                     <p className='file-name'>{filename}</p>
-                                                    <button className="download-btn" />
+                                                    <button className="download-btn"
+                                                        style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
                                                 </div>
                                             ))}
 
@@ -214,7 +219,8 @@ function InfoChat({ room , chatId }) {
                                             <div className="file">
                                                 <div className="file-icon"></div>
                                                 <p className='file-name'>{filename}</p>
-                                                <button className="download-btn" />
+                                                <button className="download-btn"
+                                                    style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
                                             </div>
                                         ))}
 

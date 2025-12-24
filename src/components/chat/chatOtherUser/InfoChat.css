@@ -123,7 +123,7 @@ img {
 .file-icon {
     width: 20px;
     height: 20px;
-    background-color: white;
+    background-color: var(--bg);
     background-image: url("../../../assets/images/file-icon.png");
     background-size: cover;
     margin-right: 20px;
@@ -140,8 +140,8 @@ img {
     width: 20px;
     height: 20px;
     border: none;
-    background-color: white;
-    background-image: url("../../../assets/images/download.png");
+    background-color: var(--bg);
+    /* background-image: url("../../../assets/images/download.png"); */
     background-size: cover;
     margin-right: 0;
     position: absolute;
@@ -197,8 +197,9 @@ img {
     height: 40%;
     margin-top: 20px;
     border-radius: 15px;
-    background-color: white;
-    border: solid 1px black;
+    background-color: var(--bg);
+    border: solid 1px var(--text);
+    color: var(--text);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -217,11 +218,12 @@ img {
     height: 90%;
     overflow-y: auto;
     border-radius: 15px;
-    background-color: white;
+    background-color: var(--bg);
+    color: var(--text);
     position: absolute;
     right: 10%;
     z-index: 100;
-    border: solid 1px black;
+    border: solid 1px var(--text);
 }
 
 .inforOtherUserBoxMobile .inforOtherUser {
@@ -241,7 +243,7 @@ img {
     height: 20px;
     background-image: url("../../../assets/images/icon-person.png");
     background-size: cover;
-    border: solid 1px black;
+    border: solid 1px var(--text);
     border-radius: 50%;
     margin-right: 5px;
 }
@@ -298,11 +300,10 @@ img {
     .infor {
         display: none;
     }
-
     .sidebar {
         width: 9%;
         height: 80px;
-        background-color: white;
+        background-color: var(--bg);
         border-radius: 10px;
         display: flex;
         flex-direction: column;
