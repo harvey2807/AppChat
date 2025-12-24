@@ -11,6 +11,7 @@ function ConsersationLayout() {
     const [room, setRoom] = useState(false)
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
+    const [selectedChatId, setSelectedChatId] = useState(null)
 
     return (
         <div className='chat-container'>
@@ -20,7 +21,7 @@ function ConsersationLayout() {
                     {showChatList && (
                         <div className='chat-left-content'>
                             <Sidebar />
-                            <ListMess />
+                            <ListMess onSelectChat={setSelectedChatId}/>
                         </div>
                     )}
 
@@ -31,21 +32,21 @@ function ConsersationLayout() {
                     <button className="chat-icon" onClick={() => setShowChatList(true)} />
                     <div className='chat-left-content'>
                         <Sidebar />
-                        <ListMess />
+                        <ListMess  onSelectChat={setSelectedChatId}/>
                     </div>
 
                 </div>
             )}
             {isMobile && !showChatList && (
                 <div className='chat-right'>
-                    <ChatOtherUser room={room} />
-                    <InfoChat room={room} />
+                    <ChatOtherUser room={room} chatId={selectedChatId} />
+                    <InfoChat room={room} chatId={selectedChatId}/>
                 </div>
             )}
             {!isMobile && (
                 <div className='chat-right'>
-                    <ChatOtherUser room={room} />
-                    <InfoChat room={room} />
+                    <ChatOtherUser room={room} chatId={selectedChatId}/>
+                    <InfoChat room={room} chatId={selectedChatId}/>
                 </div>
             )}
         </div>

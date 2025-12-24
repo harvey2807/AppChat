@@ -2,7 +2,7 @@
     width: 70%;
     height: 100%;
     border-radius: 15px;
-    background-color: white;
+    background-color: var(--bg);
     display: flex;
     flex-direction: column;
 }
@@ -13,13 +13,14 @@
     border-bottom: solid 1px gray;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 .avt {
     width: 40px;
     height: 40px;
     margin: 5px 10px 5px 10px;
-    border: solid 1px black;
+    border: solid 1px var(--text);
     border-radius: 50%;
     background-image: url("../../../assets/images/icon-person.png");
     background-size: cover;
@@ -28,6 +29,18 @@
 .user-name {
     font-size: 20px;
     font-weight: 500;
+    color: var(--text);
+}
+
+.theme-btn{
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    background-color: var(--bg);
+    background-size: cover;
+    position: absolute;
+    right: 20px;
 }
 
 .main-chat {
@@ -51,6 +64,8 @@
     border: solid 1px gray;
     border-radius: 10px;
     padding: 5px;
+    background-color: var(--bg);
+    color: var(--text);
 }
 
 .other {
@@ -62,8 +77,8 @@
 }
 
 .me .message-content {
-    background-color: green;
-    color: white;
+    background-color: var(--bg-my-chat);
+    color: var(--my-chat) !important;
 }
 
 .me .avt {
@@ -107,7 +122,7 @@
 .chat-input {
     width: 100%;
     height: 52px;
-    border-top: solid 1px black;
+    border-top: solid 1px gray;
     border-bottom-left-radius: 15px;
     border-bottom-right-radius: 15px;
     display: flex;
@@ -116,13 +131,14 @@
     justify-content: center;
     margin-top: auto;
     padding: 1px 5px 1px 5px;
+    position: relative;
 }
 
 .image-btn,
 .file-btn {
     width: 30px;    
     height: 30px;
-    background-color: white;
+    background-color: var(--bg);
     background-image: url('../../../assets/images/imageicon.png');
     background-size: cover;
     border: none;
@@ -131,6 +147,7 @@
 }
 
 .file-btn {
+    background-color: var(--bg);
     background-image: url('../../../assets/images/file.png');
 }
 
@@ -146,7 +163,7 @@
 
 .chat-text {
     width: 85%;
-    height: 76%;
+    /* height: 76%; */
     resize: none;
     overflow: hidden;
     font-size: 100%;

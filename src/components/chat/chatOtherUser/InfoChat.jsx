@@ -4,7 +4,7 @@ import useMediaQuery from '../../../hooks/useMediaQuery';
 import toggleDown from '../../../assets/images/toggledown.png'
 import toggleUp from '../../../assets/images/upload.png'
 
-function InfoChat({ room }) {
+function InfoChat({ room , chatId }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
     const [showInforUser, setShowInforUser] = useState(false);

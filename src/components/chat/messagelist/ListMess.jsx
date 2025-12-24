@@ -1,6 +1,6 @@
 import './ListMess.css';
 
-function ListMess() {
+function ListMess( onSelectChat) {
     return (
         <div className="chat-list bg-white">
             <div className="list-group list-group-flush">

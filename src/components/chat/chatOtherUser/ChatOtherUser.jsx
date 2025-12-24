@@ -1,10 +1,17 @@
 import './ChatOtherUser.css'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
+import EmojiPicker from '@emoji-mart/react'
+import data from '@emoji-mart/data'
+import { ThemeContext } from '../../../context/ThemeContext'
+import DarkTheme from '../../../assets/images/dark.png'
+import LightTheme from '../../../assets/images/light.png'
 
 const userName = "duy"
 
-function ChatOtherUser({ room }) {
+function ChatOtherUser({ room, chatId }) {
     const textareaRef = useRef(null)
+    const [text, setText] = useState("")
+    const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
     const messages = [
         { "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
@@ -33,6 +40,7 @@ function ChatOtherUser({ room }) {
             textareaRef.current.style.height = "40px";
         }
     };
+    const { theme, toggleTheme } = useContext(ThemeContext)
 
     return (
         <>
@@ -41,12 +49,18 @@ function ChatOtherUser({ room }) {
                     <div className="chat-box-header">
                         <button className='room-avt' />
                         <text className='user-name'>Tên phòng</text>
+                        <button className='theme-btn'
+                            onClick={toggleTheme}
+                            style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
                     </div>
                 )}
                 {!room && (
                     <div className="chat-box-header">
                         <button className='avt' />
                         <text className='user-name'>Người dùng khác</text>
+                        <button className='theme-btn'
+                            onClick={toggleTheme}
+                            style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
                     </div>
                 )}
 
@@ -62,12 +76,27 @@ function ChatOtherUser({ room }) {
                         <textarea className="chat-text"
                             ref={textareaRef}
                             rows="1"
+                            value={text}
+                            onChange={e => setText(e.target.value)}
                             onInput={handleInput}
                             onKeyDown={handleKeyDown}
+                            onClick={() => setShowPicker(false)}
                             placeholder='Nhập tin nhắn . . .' />
-                        <button className='icon-btn file-btn' />
+                        <button className="icon-btn file-btn"
+                            onClick={() => setShowPicker(prev => !prev)}
+                        />
                         <button className="send-btn file-btn"></button>
                     </div>
+                    {showPicker && (
+                        <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
+                            <EmojiPicker
+                                data={data}
+                                onEmojiSelect={(emoji) =>
+                                    setText(prev => prev + emoji.native)
+                                }
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
         </>
