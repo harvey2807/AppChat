@@ -21,7 +21,9 @@ h1 {
     margin-bottom: 20px;
     color: var(--text);
 }
-
+.d-flex.btn-outline-success{
+    max-width: 60%;
+}
 .side-bar {
     width: 100%;
     height: 100%;

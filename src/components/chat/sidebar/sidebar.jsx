@@ -3,7 +3,9 @@ import "./sidebar.css";
 import { ThemeContext } from '../../../context/ThemeContext'
 import DarkTheme from '../../../assets/images/dark.png'
 import LightTheme from '../../../assets/images/light.png'
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
+
+//here we need to catch api get user list 
 
 function Sidebar() {
     const { theme, toggleTheme } = useContext(ThemeContext)
