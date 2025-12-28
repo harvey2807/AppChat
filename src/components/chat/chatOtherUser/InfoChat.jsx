@@ -1,12 +1,18 @@
 import './InfoChat.css'
-import { useState } from 'react'
+import { use, useContext, useState } from 'react'
 import useMediaQuery from '../../../hooks/useMediaQuery';
-
-function InfoChat() {
+import toggleDown from '../../../assets/images/toggledown.png'
+import toggleUp from '../../../assets/images/upload.png'
+import downloadDarkBtn from '../../../assets/images/download.png'
+import downloadLightBtn from '../../../assets/images/download-light.png'
+import { ThemeContext } from '../../../context/ThemeContext';
+function InfoChat({ room, chatId }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
     const [showInforUser, setShowInforUser] = useState(false);
     const [choseMedia, setChoseMedia] = useState(0)
+    const [showListMem, setShowListMem] = useState(false)
+    const [showMedia, setShowMedia] = useState(true)
 
     const changeMedia = () => {
         if (choseMedia === 0) setChoseMedia(1)
@@ -26,57 +32,108 @@ function InfoChat() {
         "cuu_am_chan_kinh.pdf"
     ]
 
+    const { theme, toggleTheme } = useContext(ThemeContext)
+
+    const listMem = [{ "name": "Duy" }, { "name": "Toan" }, { "name": "Luc" }]
+
     return (
         <>
             {isMobile && (
                 <div className='sidebar'>
-                    <button className="more-info-btn" onClick={() => {setShowInforChat(!showInforChat); setShowInforUser(false)}} />
-                    <button className="info-u-btn" onClick={() => {setShowInforUser(!showInforUser) ; setShowInforChat(false)}} />
+                    <button className="more-info-btn"
+                        style={{ border: showInforChat ? "solid 2px black" : "none", borderRadius: "10px" }}
+                        onClick={() => { setShowInforChat(!showInforChat); setShowInforUser(false) }} />
+                    <button className="info-u-btn"
+                        style={{ border: showInforUser ? "solid 2px black" : "none", borderRadius: "10px" }}
+                        onClick={() => { setShowInforUser(!showInforUser); setShowInforChat(false) }} />
                 </div>
             )}
             {!isMobile && (
                 <div className="infor">
                     <div className='inforOtherUserBox'>
-                        <div className="inforOtherUser">
-                            <div className="avt-u avt"></div>
-                            <p>Tên người dùng</p>
-                        </div>
-                        <div className="media-box">
-                            <div className="btn-box">
-                                <button onClick={changeMedia}
-                                    className='btn-media chose'
-                                    style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
-                                >Ảnh</button>
-                                <button onClick={changeMedia}
-                                    className='btn-media'
-                                    style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
-                                >File</button>
+                        {room && (
+                            <div className="inforOtherUser">
+                                <div className="room-avt"></div>
+                                <p>Tên phòng</p>
                             </div>
-                            <div className="media">
-                                <div className="image-box row gx-3"
-                                    style={
-                                        { visibility: choseMedia === 0 ? "visible" : "hidden" }
-                                    }>
-                                    {images.map((url, index) => (
-                                        <div className="col-4 img">
-                                            <img key={index} src={url} alt={`img-${index}`} />
-                                        </div>
-                                    ))}
-                                </div>
-                                <div className="file-box"
-                                    style={
-                                        { visibility: choseMedia === 1 ? "visible" : "hidden" }
-                                    }>
-                                    {files.map((filename) => (
-                                        <div className="file">
-                                            <div className="file-icon"></div>
-                                            <p className='file-name'>{filename}</p>
-                                            <button className="download-btn" />
-                                        </div>
-                                    ))}
+                        )}
+                        {!room && (
+                            <div className="inforOtherUser">
+                                <div className="avt"></div>
+                                <p>Tên người dùng</p>
+                            </div>
+                        )}
 
+                        <div className="media-box">
+                            {room && (
+                                <div className='info-option'>
+                                    <div className="row list-mem">
+                                        <p className="col-11 label">Danh sách thành viên</p>
+                                        <button className="col-1 toggle"
+                                            onClick={() => setShowListMem(!showListMem)}
+                                            style={{ backgroundImage: showListMem ? `url(${toggleUp})` : `url(${toggleDown})` }}
+                                        ></button>
+                                    </div>
+                                    {showListMem && (
+                                        <div className="list-mem-box">
+                                            {listMem.map(mem => (
+                                                <div className='mem-info'>
+                                                    <button className='avt' style={{ width: 15, height: 15 }} />
+                                                    <p>{mem.name}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <div className="row list-mem">
+                                        <p className="col-11 label">Ảnh, file phương tiện</p>
+                                        <button className="col-1 toggle"
+                                            onClick={() => setShowMedia(!showMedia)}
+                                            style={{ backgroundImage: showMedia ? `url(${toggleUp})` : `url(${toggleDown})` }}
+                                        ></button>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
+                            {showMedia && (
+                                <div className="media-detail-box">
+                                    <div className="btn-box">
+                                        <button onClick={changeMedia}
+                                            className='btn-media chose'
+                                            style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
+                                        >Ảnh</button>
+                                        <button onClick={changeMedia}
+                                            className='btn-media'
+                                            style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
+                                        >File</button>
+                                    </div>
+                                    <div className="media">
+                                        <div className="image-box row gx-3"
+                                            style={
+                                                { visibility: choseMedia === 0 ? "visible" : "hidden" }
+                                            }>
+                                            {images.map((url, index) => (
+                                                <div className="col-4 img">
+                                                    <img key={index} src={url} alt={`img-${index}`} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="file-box"
+                                            style={
+                                                { visibility: choseMedia === 1 ? "visible" : "hidden" }
+                                            }>
+                                            {files.map((filename) => (
+                                                <div className="file">
+                                                    <div className="file-icon"></div>
+                                                    <p className='file-name'>{filename}</p>
+                                                    <button className="download-btn"
+                                                        style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
+                                                </div>
+                                            ))}
+
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                     <div className='inforUserBox'>
@@ -88,46 +145,89 @@ function InfoChat() {
             )}
             {isMobile && showInforChat && (
                 <div className='inforOtherUserBoxMobile'>
-                    <div className="inforOtherUserMobile">
-                        <div className="avt-u avt-mobile"></div>
-                        <p>Tên người dùng</p>
-                    </div>
-                    <div className="media-box">
-                        <div className="btn-box">
-                            <button onClick={changeMedia}
-                                className='btn-media chose'
-                                style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
-                            >Ảnh</button>
-                            <button onClick={changeMedia}
-                                className='btn-media'
-                                style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
-                            >File</button>
+                    {room && (
+                        <div className="inforOtherUserMobile">
+                            <div className="room-avt avt-mobile"></div>
+                            <p>Tên phòng</p>
                         </div>
-                        <div className="media">
-                            <div className="image-box row gx-3"
-                                style={
-                                    { visibility: choseMedia === 0 ? "visible" : "hidden" }
-                                }>
-                                {images.map((url, index) => (
-                                    <div className="col-4 img">
-                                        <img key={index} src={url} alt={`img-${index}`} />
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="file-box"
-                                style={
-                                    { visibility: choseMedia === 1 ? "visible" : "hidden" }
-                                }>
-                                {files.map((filename) => (
-                                    <div className="file">
-                                        <div className="file-icon"></div>
-                                        <p className='file-name'>{filename}</p>
-                                        <button className="download-btn" />
-                                    </div>
-                                ))}
+                    )}
+                    {!room && (
+                        <div className="inforOtherUserMobile">
+                            <div className="avt-u avt-mobile"></div>
+                            <p>Tên người dùng</p>
+                        </div>
+                    )}
 
+                    <div className="media-box">
+                        {room && (
+                            <div className='info-option'>
+                                <div className="row list-mem">
+                                    <p className="col-11 label">Danh sách thành viên</p>
+                                    <button className="col-1 toggle"
+                                        onClick={() => setShowListMem(!showListMem)}
+                                        style={{ backgroundImage: showListMem ? `url(${toggleUp})` : `url(${toggleDown})` }}
+                                    ></button>
+                                </div>
+
+                                {showListMem && (
+                                    <div className="list-mem-box">
+                                        {listMem.map(mem => (
+                                            <div className='mem-info'>
+                                                <button className='avt' style={{ width: 15, height: 15 }} />
+                                                <p>{mem.name}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="row list-mem">
+                                    <p className="col-11 label">Ảnh, file phương tiện</p>
+                                    <button className="col-1 toggle"
+                                        onClick={() => setShowMedia(!showMedia)}
+                                        style={{ backgroundImage: showMedia ? `url(${toggleUp})` : `url(${toggleDown})` }}
+                                    ></button>
+                                </div>
                             </div>
-                        </div>
+                        )}
+                        {showMedia && (
+                            <div className='media-detail-box'>
+                                <div className="btn-box">
+                                    <button onClick={changeMedia}
+                                        className='btn-media chose'
+                                        style={{ backgroundColor: choseMedia === 0 ? 'cyan' : 'white' }}
+                                    >Ảnh</button>
+                                    <button onClick={changeMedia}
+                                        className='btn-media'
+                                        style={{ backgroundColor: choseMedia === 1 ? 'cyan' : 'white' }}
+                                    >File</button>
+                                </div>
+                                <div className="media">
+                                    <div className="image-box row gx-3"
+                                        style={
+                                            { visibility: choseMedia === 0 ? "visible" : "hidden" }
+                                        }>
+                                        {images.map((url, index) => (
+                                            <div className="col-4 img">
+                                                <img key={index} src={url} alt={`img-${index}`} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="file-box"
+                                        style={
+                                            { visibility: choseMedia === 1 ? "visible" : "hidden" }
+                                        }>
+                                        {files.map((filename) => (
+                                            <div className="file">
+                                                <div className="file-icon"></div>
+                                                <p className='file-name'>{filename}</p>
+                                                <button className="download-btn"
+                                                    style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
+                                            </div>
+                                        ))}
+
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

@@ -1,6 +1,54 @@
-.sidebar{
-    padding: 0%;
+
+.chat-sidebar {
+    width: 90%;
+    height: 20vh;
+    padding: 20px 10px 0 10px;
+    margin-bottom: 50px;
+}
+.buttonSide{
+    display: flex;
+    flex-direction: column;
+
+    gap: 10px;
 }
 .filter-buttons {
     margin-top: 10px;
+  
+}
+
+h1 {
+    font-size: 30px;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+.d-flex.btn-outline-success{
+    max-width: 60%;
+}
+.side-bar {
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+}
+
+@media(max-width: 992px) {
+    .chat-sidebar {
+        width: 100%;
+        height: 100px;
+        display: flex;
+    }
+
+    .name {
+        display: none;
+    }
+
+    input {
+        width: 80% !important;
+    }
+
+    input,
+    .btn {
+        height: 25px;
+        font-size: 10px !important;
+        padding: 0 4px;
+    }
 }
