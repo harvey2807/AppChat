@@ -4,7 +4,7 @@
     height: 60%;
     border: 1px solid #e0e0e0;
     border-radius: 16px;
-    padding: 16px;
+    padding: 0 16px;
     background-color: var(--bg);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     transition: box-shadow 200ms ease, transform 200ms ease;
@@ -23,29 +23,24 @@
     color: var(--text);
 }
 
-.chat-list .list-group-item {
-
+.chat-list .list-group-item {   
     background-color: var(--bg);
-}
-
-.list-group-item {
+    border-radius: 10px;
     border: none;
     padding: 10px 5px 10px 10px;
     border-radius: 12px;
-    margin-bottom: 10px;
-    /* background-color: var(--); */
-    /* transition: background-color 200ms ease; */
+    margin-top: 10px;
 }
 
-.avatar {
+.avatar{
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    margin-left:-20px;
-    margin-top: -10px;
-    background-image: url("../../../assets/images/user.png");
-    
-    /* background-size: cover; */
+    margin-right: 10px;
+    background-position: center;
+    background-size: cover;
+    background-image: url("../../../assets/images/icon-person.png");
+    border: solid 2px gray;
 }
 
 .status-dot {
@@ -53,6 +48,11 @@
     width: 10px;
     border-radius: 50%;
     background-color: #0cff5d;
+}
+@media(max-width: 1200px) {
+    .avatar{
+        height: 30px;
+    }
 }
 
 @media(max-width: 992px) {
@@ -70,8 +70,16 @@
     }
 
     .list-group-item {
+        height: 40px;
+        display: flex;
         font-size: 10px;
         padding: 3px;
+        justify-content: center;
+        align-items: center;
+    }
+    .avatar{
+        width: 30px;
+        height: 30px;
     }
 
 }
