@@ -23,6 +23,8 @@ export const useWebSocket = () => {
                 const message = JSON.parse(event.data);
                 console.log("WebSocket message received:", message);
                 setLastMessage(message);
+                const customEvent = new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message });
+                window.dispatchEvent(customEvent);
             } catch (error) {
                 console.error("Error parsing WebSocket message:", error);
             }
