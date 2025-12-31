@@ -23,6 +23,8 @@ export const useWebSocket = () => {
                 const message = JSON.parse(event.data);
                 console.log("WebSocket message received:", message);
                 setLastMessage(message);
+                const customEvent = new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message });
+                window.dispatchEvent(customEvent);
             } catch (error) {
                 console.error("Error parsing WebSocket message:", error);
             }
@@ -42,6 +44,7 @@ export const useWebSocket = () => {
 
     const sendMessage = useCallback((payload) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            console.log("Sending WebSocket message:", payload);
             socketRef.current.send(JSON.stringify(payload));
         } else {
             console.warn("WebSocket is not connected");

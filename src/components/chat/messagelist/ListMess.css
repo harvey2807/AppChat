@@ -55,6 +55,14 @@
     }
 }
 
+.status-dot.online {
+  background-color: #0cff5d;
+}
+
+/* Offline */
+.status-dot.offline {
+  background-color: #adb5bd;
+}
 @media(max-width: 992px) {
     .chat-list {
         width: 95%;
