@@ -24,7 +24,6 @@ function ListMess(onSelectChat) {
                         <div className="d-flex align-items-center">
                             <div className="avatar"></div>
                             <div className="colorMessage">
-
                                 <h6 className="mb-0 ">Tên người dùng khác</h6>
                                 <small className="">Bạn: tin nhắn mới nhất</small>
                             </div>
