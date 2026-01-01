@@ -33,7 +33,7 @@ function Login() {
                     localStorage.setItem('authToken', data.token);
                 }
                 // Redirect
-                navigate('/');
+                navigate('/app');
             } else {
                 // Handle login error
                 console.log('Login failed');
