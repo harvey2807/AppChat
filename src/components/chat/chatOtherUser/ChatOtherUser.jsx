@@ -48,7 +48,7 @@ function ChatOtherUser({ room, chatId }) {
                 {room && (
                     <div className="chat-box-header">
                         <button className='room-avt' />
-                        <text className='user-name'>Tên phòng</text>
+                        <p className='user-name'>Tên phòng</p>
                         <button className='theme-btn'
                             onClick={toggleTheme}
                             style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
@@ -57,7 +57,7 @@ function ChatOtherUser({ room, chatId }) {
                 {!room && (
                     <div className="chat-box-header">
                         <button className='avt' />
-                        <text className='user-name'>Người dùng khác</text>
+                        <p className='user-name'>Người dùng khác</p>
                         <button className='theme-btn'
                             onClick={toggleTheme}
                             style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
@@ -72,7 +72,7 @@ function ChatOtherUser({ room, chatId }) {
                 <div className="chat-input">
                     <button className='image-btn' />
                     <button className='file-btn' />
-                    <div class="form-chat">
+                    <div className="form-chat">
                         <textarea className="chat-text"
                             ref={textareaRef}
                             rows="1"
@@ -105,7 +105,7 @@ function ChatOtherUser({ room, chatId }) {
 function Message(msg, room) {
     if (msg.name === userName) {
         return (
-            <div className="message me">
+            <div key={msg.id} className="message me">
                 <div className="message-content">
                     <p>{msg.mes}</p>
                     <span className="time-send">
@@ -117,7 +117,7 @@ function Message(msg, room) {
         )
     } else {
         return (
-            <div className="message other">
+            <div key={msg.id} className="message other">
                 <button className='avt' style={{ width: 15, height: 15 }} />
                 <div className="message-box">
                     {room && (<p className='sender-mess'>Duy đã gửi tin nhắn</p>)}

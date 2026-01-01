@@ -9,13 +9,13 @@ function ListMess() {
     const [users, setUsers] = useState([]);
     const [onlineStatus, setOnlineStatus] = useState({});
     const [lastMessages, setLastMessages] = useState([]);
-    const currentUser = "luc";
+    const currentUser = localStorage.getItem("USER");
     const checkQueueRef = useRef([]);
 
     // Initialize: login and get list user
     useEffect(() => {
         if (isConnected) {
-            sendMessage(SocketRequests.login("luc", "12345"));
+            // sendMessage(SocketRequests.login("luc", "12345"));
             sendMessage(SocketRequests.getUserList());
         }
     }, [isConnected, sendMessage]);
@@ -130,7 +130,7 @@ function ListMess() {
                     const isOnline = onlineStatus[user.name];
 
                     return (
-                        <a key={user.name || index} href="#" className="list-group-item list-group-item-action">
+                        <a key={user.name} href="#" className="list-group-item list-group-item-action">
                             <div className="d-flex w-100 align-items-center justify-content-between">
                                 <div className="d-flex align-items-center">
                                     <div className="avatar me-3">

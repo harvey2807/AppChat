@@ -13,6 +13,7 @@ function InfoChat({ room, chatId }) {
     const [choseMedia, setChoseMedia] = useState(0)
     const [showListMem, setShowListMem] = useState(false)
     const [showMedia, setShowMedia] = useState(true)
+    const username = localStorage.getItem("USER")
 
     const changeMedia = () => {
         if (choseMedia === 0) setChoseMedia(1)
@@ -77,7 +78,7 @@ function InfoChat({ room, chatId }) {
                                     {showListMem && (
                                         <div className="list-mem-box">
                                             {listMem.map(mem => (
-                                                <div className='mem-info'>
+                                                <div key={mem.name} className='mem-info'>
                                                     <button className='avt' style={{ width: 15, height: 15 }} />
                                                     <p>{mem.name}</p>
                                                 </div>
@@ -112,7 +113,7 @@ function InfoChat({ room, chatId }) {
                                                 { visibility: choseMedia === 0 ? "visible" : "hidden" }
                                             }>
                                             {images.map((url, index) => (
-                                                <div className="col-4 img">
+                                                <div key={url} className="col-4 img">
                                                     <img key={index} src={url} alt={`img-${index}`} />
                                                 </div>
                                             ))}
@@ -122,7 +123,7 @@ function InfoChat({ room, chatId }) {
                                                 { visibility: choseMedia === 1 ? "visible" : "hidden" }
                                             }>
                                             {files.map((filename) => (
-                                                <div className="file">
+                                                <div key={filename} className="file">
                                                     <div className="file-icon"></div>
                                                     <p className='file-name'>{filename}</p>
                                                     <button className="download-btn"
@@ -138,7 +139,7 @@ function InfoChat({ room, chatId }) {
                     </div>
                     <div className='inforUserBox'>
                         <div className="avt avt-u"></div>
-                        <p>Tên người dùng</p>
+                        <p>{username}</p>
                         <button className='logout-btn'>Đăng xuất</button>
                     </div>
                 </div>
@@ -172,7 +173,7 @@ function InfoChat({ room, chatId }) {
                                 {showListMem && (
                                     <div className="list-mem-box">
                                         {listMem.map(mem => (
-                                            <div className='mem-info'>
+                                            <div key={mem.name} className='mem-info'>
                                                 <button className='avt' style={{ width: 15, height: 15 }} />
                                                 <p>{mem.name}</p>
                                             </div>
@@ -216,7 +217,7 @@ function InfoChat({ room, chatId }) {
                                             { visibility: choseMedia === 1 ? "visible" : "hidden" }
                                         }>
                                         {files.map((filename) => (
-                                            <div className="file">
+                                            <div key={filename} className="file">
                                                 <div className="file-icon"></div>
                                                 <p className='file-name'>{filename}</p>
                                                 <button className="download-btn"
@@ -234,7 +235,7 @@ function InfoChat({ room, chatId }) {
             {isMobile && showInforUser && (
                 <div className='inforUserBoxMobile'>
                     <div className="avt avt-u"></div>
-                    <p>Tên người dùng</p>
+                    <p>{username}</p>
                     <button className='logout-btn'>Đăng xuất</button>
                 </div>
             )}

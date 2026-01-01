@@ -1,56 +1,48 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect } from 'react';
 import './Login.css';
+import { useWebSocket } from '../../context/WebSocketContext';
+import { SocketRequests } from '../../hooks/useWebSocket';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
-    const navigate = useNavigate();
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
+    const { isConnected, lastMessage, sendMessage } = useWebSocket();
+    const { loginSuccess } = useAuth()
+    const navigate = useNavigate()
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
         try{
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({username, password}),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Handle successful login
-                console.log('Login successful');
-                // Store token
-                if (data.token) {
-                    localStorage.setItem('authToken', data.token);
-                }
-                // Redirect
-                navigate('/app');
-            } else {
-                // Handle login error
-                console.log('Login failed');
-                setError(data.message || 'Login failed. Please check your credentials.');
+            if (!isConnected) {
+                setError("WebSocket not connected");
+                setLoading(false);
+                return;
             }
-
-            console.log('Login ok', data);
-
-            // Further processing based on response data here
-
-        }catch(err){
-            console.error('Error during login:', err);
-            setError('An error occurred during login. Please try again!');
-        }finally{
-            setLoading(false);
+            sendMessage(SocketRequests.login(username, password));
+        }catch (e){
+            console.log(e.mes)
         }
     };
+
+    useEffect(() => {
+        if (!lastMessage) return;
+
+        if (lastMessage.event === "LOGIN") {
+            if (lastMessage.status === "success") {
+                loginSuccess(username, lastMessage.data.RE_LOGIN_CODE);
+                navigate("/app");
+            } else {
+                setError(lastMessage.mes);
+            }
+            setLoading(false);
+        }
+    }, [lastMessage]);
 
     return (
         <div className="login-page">
@@ -94,4 +86,4 @@ function Login() {
     );
 }
 
-export  default Login;
+export default Login;
