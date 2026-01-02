@@ -1,69 +1,57 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useAuth } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
-import { SocketRequests } from "../hooks/useWebSocket";
+
 const SOCKET_URL = "wss://chat.longapp.site/chat/chat";
+let socket = null;
 
 export const useWebSocket = () => {
-    const [isConnected, setIsConnected] = useState(false);
-    const [lastMessage, setLastMessage] = useState(null);
     const socketRef = useRef(null);
-    const { user, reloginCode } = useAuth()
-    const navigate = useNavigate()
-    useEffect(() => {
-        //init websocket only once
-        socketRef.current = new WebSocket(SOCKET_URL);
+    const [isConnected, setIsConnected] = useState(false);
 
-        //handle websocket events
-        socketRef.current.onopen = () => {
+    const connect = useCallback(() => {
+        if (socket && socket.readyState === WebSocket.OPEN) return;
+
+        socket = new WebSocket(SOCKET_URL);
+        socketRef.current = socket;
+
+        socket.onopen = () => {
             console.log("WebSocket connected");
             setIsConnected(true);
         };
 
-        //handle websocket events when server sends a message
-        socketRef.current.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                console.log("WebSocket message received:", message);
-                setLastMessage(message);
-                const customEvent = new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message });
-                window.dispatchEvent(customEvent);
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            window.dispatchEvent(
+                new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message })
+            );
+        };
 
-            } catch (error) {
-                console.error("Error parsing WebSocket message:", error);
-            }
-        };
-        socketRef.onerror = (error) => {
-            console.error("⚠️ WebSocket Error:", error);
-        };
-        socketRef.current.onclose = () => {
+        socket.onclose = () => {
             console.log("WebSocket disconnected");
             setIsConnected(false);
         };
-
-        return () => {
-            if (socketRef.current && isConnected) {
-                socketRef.current.close();
-            }
-        };
     }, []);
 
-    // useEffect(() => {
-    //     if (isConnected && reloginCode && socketRef.current.readyState === WebSocket.OPEN) {
-    //         socketRef.current.send(JSON.stringify(SocketRequests.reLogin(user, reloginCode)));
-    //         navigate("/app");
-    //     }
-    // }, [isConnected, reloginCode]);
+    const disconnect = useCallback(() => {
+        socket?.close();
+        socket = null;
+    }, []);
 
     const sendMessage = useCallback((payload) => {
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            console.log("Sending WebSocket message:", payload);
-            socketRef.current.send(JSON.stringify(payload));
-        } else {
-            console.warn("WebSocket is not connected");
+        if (socket?.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(payload));
         }
     }, []);
 
-    return { isConnected, lastMessage, sendMessage };
+    return { connect, disconnect, sendMessage, isConnected };
+};
 
-};  
+export function WebSocketProvider({ children }) {
+    const { connect, disconnect } = useWebSocket();
+    useEffect(() => {
+        connect();              // ✅ CONNECT NGAY KHI APP LOAD
+        return () => disconnect();
+    }, []);
+
+    return children;
+}

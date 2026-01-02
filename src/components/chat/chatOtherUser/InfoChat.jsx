@@ -6,6 +6,8 @@ import toggleUp from '../../../assets/images/upload.png'
 import downloadDarkBtn from '../../../assets/images/download.png'
 import downloadLightBtn from '../../../assets/images/download-light.png'
 import { ThemeContext } from '../../../context/ThemeContext';
+import { useAuth } from '../../../context/AuthContext';
+import { useWebSocket } from '../../../context/WebSocketContext';
 function InfoChat({ room, chatId }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
@@ -14,6 +16,8 @@ function InfoChat({ room, chatId }) {
     const [showListMem, setShowListMem] = useState(false)
     const [showMedia, setShowMedia] = useState(true)
     const username = localStorage.getItem("USER")
+    const {logout} = useAuth()
+    const {disconnect } = useWebSocket();
 
     const changeMedia = () => {
         if (choseMedia === 0) setChoseMedia(1)
@@ -37,6 +41,10 @@ function InfoChat({ room, chatId }) {
 
     const listMem = [{ "name": "Duy" }, { "name": "Toan" }, { "name": "Luc" }]
 
+    const handleLogout = () => {
+        logout()
+        disconnect()
+    }
     return (
         <>
             {isMobile && (
@@ -140,7 +148,7 @@ function InfoChat({ room, chatId }) {
                     <div className='inforUserBox'>
                         <div className="avt avt-u"></div>
                         <p>{username}</p>
-                        <button className='logout-btn'>Đăng xuất</button>
+                        <button onClick={handleLogout} className='logout-btn'>Đăng xuất</button>
                     </div>
                 </div>
             )}
@@ -236,7 +244,7 @@ function InfoChat({ room, chatId }) {
                 <div className='inforUserBoxMobile'>
                     <div className="avt avt-u"></div>
                     <p>{username}</p>
-                    <button className='logout-btn'>Đăng xuất</button>
+                    <button onClick={handleLogout} className='logout-btn'>Đăng xuất</button>
                 </div>
             )}
         </>

@@ -45,8 +45,16 @@ h1 {
 .btn {
     height: 30px;
     font-size: 10px !important;
+    border: solid 1px #198754;
 }
-
+.join-btn{
+    margin-left: auto;
+    height: 24px;
+    border: none;
+    background-color: var(--bg);
+    background-image: url("../../../assets/images/join_btn.png");
+    background-size: contain;
+}
 @media(max-width: 1200px) {
     .name {
         font-size: 20px;

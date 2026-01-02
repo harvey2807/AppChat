@@ -1,48 +1,51 @@
-import React, {useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Login.css';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { SocketRequests } from '../../hooks/useWebSocket';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useIsRTL } from 'react-bootstrap/esm/ThemeProvider';
 
 function Login() {
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
-    const { isConnected, lastMessage, sendMessage } = useWebSocket();
-    const { loginSuccess } = useAuth()
-    const navigate = useNavigate()
-
+    const { sendMessage, isConnected, connect } = useWebSocket();
+    const { loginSuccess } = useAuth();
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-        try{
-            if (!isConnected) {
-                setError("WebSocket not connected");
-                setLoading(false);
-                return;
-            }
-            sendMessage(SocketRequests.login(username, password));
-        }catch (e){
-            console.log(e.mes)
-        }
+
+        sendMessage(SocketRequests.login(username, password));
+        localStorage.setItem("USERNAME", username)
     };
 
     useEffect(() => {
-        if (!lastMessage) return;
-
-        if (lastMessage.event === "LOGIN") {
-            if (lastMessage.status === "success") {
-                loginSuccess(username, lastMessage.data.RE_LOGIN_CODE);
-                navigate("/app");
-            } else {
-                setError(lastMessage.mes);
-            }
-            setLoading(false);
+        if (!isConnected) {
+            connect()
         }
-    }, [lastMessage]);
+    }, [])
+
+    useEffect(() => {
+        const handler = (e) => {
+            const msg = e.detail;
+            const username = localStorage.getItem("USERNAME")
+            console.log(username)
+            console.log(msg)
+            if (msg.event === "LOGIN" && msg.status === "success") {
+                loginSuccess(username, msg.data.RE_LOGIN_CODE);
+            }
+
+            if (msg.type === "LOGIN" && msg.status === "error") {
+                setError(msg.message || "Login failed");
+                setLoading(false);
+            }
+        };
+
+        window.addEventListener("WS_MESSAGE_RECEIVED", handler);
+        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
+    }, [loginSuccess]);
 
     return (
         <div className="login-page">

@@ -5,13 +5,16 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { WebSocketProvider } from './context/WebSocketContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <AuthProvider>
-    <ThemeProvider>
-      <App />
-    </ThemeProvider>
+    <WebSocketProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </WebSocketProvider>
   </AuthProvider>
 );
 

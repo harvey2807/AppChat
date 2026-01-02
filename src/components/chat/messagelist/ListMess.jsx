@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, use } from 'react';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
 import { formatTime } from '../../../utils/formatTime';
+import { useAuth } from '../../../context/AuthContext';
 
 function ListMess() {
     const { isConnected, sendMessage } = useWebSocket();
@@ -11,19 +12,22 @@ function ListMess() {
     const [lastMessages, setLastMessages] = useState([]);
     const currentUser = localStorage.getItem("USER");
     const checkQueueRef = useRef([]);
+    const { isAuth } = useAuth()
 
     // Initialize: login and get list user
     useEffect(() => {
-        if (isConnected) {
+        if (isAuth) {
             // sendMessage(SocketRequests.login("luc", "12345"));
+            console.log("Đang lấy list user")
             sendMessage(SocketRequests.getUserList());
+            console.log("Đã lấy xong list user")
         }
-    }, [isConnected, sendMessage]);
+    }, [isConnected, isAuth]);
 
     // handle check online status for each user
     useEffect(() => {
 
-        if (isConnected && users.length > 0) {
+        if (users.length > 0) {
             checkQueueRef.current = [];
 
             users.forEach((user) => {
@@ -35,12 +39,12 @@ function ListMess() {
                 }
             });
         }
-    }, [isConnected, users, sendMessage]);
+    }, [users, sendMessage]);
     //handle get last message using api GET_PEOPLE_CHAT_MES
     //logic to get last message: server response a conversation list of 2 people
     //we will get the list messages and sort by time, then get the last message
     useEffect(() => {
-        if (isConnected && users.length > 0) {
+        if (users.length > 0) {
             users.forEach((user) => {
                 if (user.name) {
                     if (user.type === 0) {
@@ -56,7 +60,7 @@ function ListMess() {
                 }
             });
         }
-    }, [users, isConnected, sendMessage]);
+    }, [users, sendMessage]);
 
     //Handle response from server
     useEffect(() => {
