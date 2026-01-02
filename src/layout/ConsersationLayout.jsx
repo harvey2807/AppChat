@@ -9,22 +9,27 @@ import { useContext, useEffect } from 'react';
 
 function ConsersationLayout() {
     const [room, setRoom] = useState(false)
+    const [filterType, setFilterType] = useState('all');
+    console.log("Current filterType in ConsersationLayout:", filterType);
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChatId, setSelectedChatId] = useState(null)
 
+    const handleFilterChange = (type) => {
+        setFilterType(type);
+    };
     return (
         <div className='chat-container'>
             {isMobile && (
                 <>
                     <div className='chat-left' style={{ width: showChatList ? '100%' : '5%' }}>
-                        <div className='icon-menu' style={{width: showChatList ? '5%' : '100%'}}>
+                        <div className='icon-menu' style={{ width: showChatList ? '5%' : '100%' }}>
                             <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         </div>
                         {showChatList && (
                             <div className='chat-left-content'>
-                                <Sidebar />
-                                <ListMess onSelectChat={setSelectedChatId} />
+                                <Sidebar onFilterChange={handleFilterChange} />
+                                <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
                             </div>
                         )}
                     </div>
@@ -41,8 +46,8 @@ function ConsersationLayout() {
                     <div className='chat-left'>
                         <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         <div className='chat-left-content'>
-                            <Sidebar />
-                            <ListMess onSelectChat={setSelectedChatId} />
+                            <Sidebar onFilterChange={handleFilterChange} />
+                            <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
                         </div>
 
                     </div>

@@ -1,4 +1,3 @@
-// ConversationItem.jsx
 import { formatTime } from '../../../utils/formatTime';
 
 function ConversationItem({ user, isOnline, lastMessage }) {
