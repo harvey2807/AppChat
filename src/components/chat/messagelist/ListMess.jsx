@@ -20,7 +20,7 @@ function ListMess() {
             // sendMessage(SocketRequests.login("luc", "12345"));
             console.log("Đang lấy list user")
             sendMessage(SocketRequests.getUserList());
-            console.log("Đã lấy xong list user")
+            console.log("Đã lấy xong list user khi relogin")
         }
     }, [isConnected, isAuth]);
 
@@ -39,12 +39,13 @@ function ListMess() {
                 }
             });
         }
-    }, [users, sendMessage]);
+    }, [users, sendMessage, isConnected]);
     //handle get last message using api GET_PEOPLE_CHAT_MES
     //logic to get last message: server response a conversation list of 2 people
     //we will get the list messages and sort by time, then get the last message
     useEffect(() => {
         if (users.length > 0) {
+            console.log("Danh sách user: " + users)
             users.forEach((user) => {
                 if (user.name) {
                     if (user.type === 0) {
@@ -60,7 +61,7 @@ function ListMess() {
                 }
             });
         }
-    }, [users, sendMessage]);
+    }, [users, sendMessage, isConnected]);
 
     //Handle response from server
     useEffect(() => {
@@ -125,7 +126,7 @@ function ListMess() {
         return () => {
             window.removeEventListener("WS_MESSAGE_RECEIVED", handleSocketMessage);
         };
-    }, []);
+    }, [isConnected]);
 
     return (
         <div className="chat-list">

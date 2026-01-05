@@ -1,5 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth, setIsAuth } from "./AuthContext";
+import { SocketRequests } from "../hooks/useWebSocket";
+
 
 const SOCKET_URL = "wss://chat.longapp.site/chat/chat";
 let socket = null;
@@ -21,6 +23,7 @@ export const useWebSocket = () => {
 
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
+            onMessage(message)
             window.dispatchEvent(
                 new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message })
             );
@@ -36,7 +39,14 @@ export const useWebSocket = () => {
         socket?.close();
         socket = null;
     }, []);
-
+    const onMessage = (msg) => {
+        switch (msg.type) {
+            case "LOGIN":
+            case "RE_LOGIN":
+                sendMessage(SocketRequests.getUserList());
+                break;
+        }
+    };
     const sendMessage = useCallback((payload) => {
         if (socket?.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(payload));
