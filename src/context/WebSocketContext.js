@@ -59,7 +59,7 @@ export const useWebSocket = () => {
 export function WebSocketProvider({ children }) {
     const { connect, disconnect } = useWebSocket();
     useEffect(() => {
-        connect();              // ✅ CONNECT NGAY KHI APP LOAD
+        connect();
         return () => disconnect();
     }, []);
 

@@ -1,12 +1,26 @@
 import { useState } from "react";
 import "./sidebar.css";
+// import 'bootstrap/dist/css/bootstrap.min.css';
 
 //here we need to catch api get user list 
 
-function Sidebar() {
+function Sidebar({ onFilterChange }) {
+    const [selectedFilter, setSelectedFilter] = useState('all');
+
     const [chooseRoom, setChooseRoom] = useState(false)
-    const handleChooseRoom = () => {
-        setChooseRoom(prev => !prev)
+    // const handleChooseRoom = () => {
+    //     setChooseRoom(prev => !prev)
+    // }
+    const handleClick = (filter) => {
+        setSelectedFilter(filter);
+        console.log(`Filter selected: ${filter}`);
+
+        if (onFilterChange) {
+            onFilterChange(filter);
+        }
+        if (filter === 'room') {
+            setChooseRoom(true)
+        }
     }
     return (
         <div className="sidebar-container">
@@ -18,17 +32,11 @@ function Sidebar() {
                             <input className="form-control me-2" type="search" style={{ width: "80%" }} placeholder="Search" aria-label="Search" />
                             <button className="btn btn-outline-success" type="submit">Search</button>
                         </form>
-                        <div className="filter-buttons d-flex gap-2" style={{ alignItems: "center" }}>
-                            <button
-                                onClick={() => setChooseRoom(false)}
-                                style={{ backgroundColor: chooseRoom ? "var(--bg)" : "var(--chose-btn) ", color: chooseRoom ? "var(--text)" : "var(--bg)" }}
-                                type="button"
-                                className="btn">All</button>
-                            <button
-                                onClick={handleChooseRoom}
-                                style={{ backgroundColor: chooseRoom ? "var(--chose-btn)" : "var(--bg)", color: chooseRoom ? "var(--bg)" : "var(--text)" }}
-                                type="button"
-                                className="btn">Room</button>
+                        <div className="filter-buttons d-flex gap-2">
+                            {/* when user click all, it  will show all conversations 
+                            but when user click Room, it will show only room conversations with type = 1*/}
+                            <button type="button" onClick={() => handleClick('all')} className="btn btn-outline-success">All</button>
+                            <button type="button" onClick={() => handleClick('room')} className="btn btn-outline-success">Room</button>
                             {chooseRoom && (
                                 <button type="button" className="btn join-btn"></button>
                             )}
