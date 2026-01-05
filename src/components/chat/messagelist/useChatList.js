@@ -48,7 +48,7 @@ export const useChatList = () => {
     }, [isConnected, users, sendMessage]);
 
     useEffect(() => {
-        if (isConnected && users.length > 0) {
+        if (isConnected || users.length > 0) {
             users.forEach((user) => {
                 if (user.name) {
                     if (user.type === 0) {

@@ -6,6 +6,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [reloginCode, setReloginCode] = useState(null);
+  const [dstUser, setDstUser] = useState("");
+  const [dstRoom, setDstRoom] = useState("");
 
   // Restore session khi reload
   useEffect(() => {
@@ -35,6 +37,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.clear();
   };
 
+  const chatWithUser = (username) => {
+    setDstUser(username);
+    setDstRoom("");
+  };
+
+  const chatInRoom = (roomName) => {
+    setDstRoom(roomName);
+    setDstUser("");
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -43,6 +55,8 @@ export const AuthProvider = ({ children }) => {
         reloginCode,
         loginSuccess,
         logout,
+        dstUser,
+        dstRoom
       }}
     >
       {children}
