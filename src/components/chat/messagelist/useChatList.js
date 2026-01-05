@@ -17,7 +17,8 @@ export const useChatList = () => {
     useEffect(() => {
         // sendMessage(SocketRequests.login("luc", "12345"));
         console.log("isConnected:", isConnected, "isAuth:", isAuth);
-        if ( isAuth) {
+
+        if (isConnected || isAuth) {
             console.log("dcmmmmmmmmmmmmmmmmm")
             sendMessage(SocketRequests.getUserList());
             console.log("Length of users after request:", users.length);
@@ -48,7 +49,7 @@ export const useChatList = () => {
     }, [isConnected, users, sendMessage]);
 
     useEffect(() => {
-        if (isConnected && users.length > 0) {
+        if (isConnected || users.length > 0) {
             users.forEach((user) => {
                 if (user.name) {
                     if (user.type === 0) {

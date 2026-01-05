@@ -2,7 +2,6 @@ import './ListMess.css';
 import { useChatList } from './useChatList';
 import ConversationItem from './ConversationItem';
 
-
 function ListMess({ onSelectChat, filter }) {
     const { users, onlineStatus, lastMessages } = useChatList();
     // 

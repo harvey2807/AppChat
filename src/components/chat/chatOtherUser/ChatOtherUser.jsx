@@ -5,8 +5,11 @@ import data from '@emoji-mart/data'
 import { ThemeContext } from '../../../context/ThemeContext'
 import DarkTheme from '../../../assets/images/dark.png'
 import LightTheme from '../../../assets/images/light.png'
-import { useWebSocket } from '../../../context/WebSocketContext'
-import { SocketRequests } from '../../../hooks/useWebSocket'
+
+import {useAuth} from "../../../context/AuthContext";
+import {useWebSocket} from "../../../context/WebSocketContext";
+import {SocketRequests} from "../../../hooks/useWebSocket";
+
 
 const userName = localStorage.getItem("USER")
 
@@ -15,7 +18,12 @@ function ChatOtherUser({ room, chatId }) {
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
-    const {sendMessage} = useWebSocket()
+
+    const {sendMessage} = useWebSocket();
+    var dstUser = useAuth().dstUser;
+    var dstRoom = useAuth().dstRoom;
+    const srcUser = useAuth().user?.username || "";
+
     const messages = [
         { "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
         { "id": 11076, "name": "duy", "type": 0, "to": "tttt", "mes": "Ok luôn bạn ê.", "createAt": "2025-12-12 07:31:09" },
@@ -38,14 +46,48 @@ function ChatOtherUser({ room, chatId }) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            // onSend?.(textareaRef.current.value);
-            const message = textareaRef.current.value;
-            sendMessage(SocketRequests.sendToRoom(chatId, message))
+            // const message = textareaRef.current.value;
+            // sendMessage(SocketRequests.sendToRoom(chatId, message))
+
+            sendNude();
             textareaRef.current.value = "";
             textareaRef.current.style.height = "40px";
         }
     };
     const { theme, toggleTheme } = useContext(ThemeContext)
+
+    const sendNude = () => {
+        console.log("Send message:", text);
+
+        // FOR TESTING PURPOSES ONLY
+        // dstUser = "tttt" // REMOVE THIS LINE IN PRODUCTION
+        dstRoom = "room1" // REMOVE THIS LINE IN PRODUCTION
+
+        // get msg text
+        const msgText = text.trim();
+        if (msgText === "") {
+            console.log("Message is empty.");
+            return; // don't send empty message
+        }
+
+        // reset input
+        setText("");
+
+        // send msg
+        console.log("Message packaging...");
+
+        // check whether send message to room or people
+        if (dstUser === ""){
+            const packet = SocketRequests.sendToRoom(dstRoom, msgText);
+            console.log("Sending packet:", packet);
+            // sendMessage(packet);
+            return;
+        } else {
+            const packet = SocketRequests.sendToPeople(dstUser, msgText);
+            console.log("Sending packet:", packet);
+            // sendMessage(packet);
+        }
+    }
 
     return (
         <>
@@ -90,7 +132,7 @@ function ChatOtherUser({ room, chatId }) {
                         <button className="icon-btn file-btn"
                             onClick={() => setShowPicker(prev => !prev)}
                         />
-                        <button className="send-btn file-btn"></button>
+                        <button className="send-btn file-btn" onClick={sendNude}></button>
                     </div>
                     {showPicker && (
                         <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
