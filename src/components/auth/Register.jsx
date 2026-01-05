@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Register.css';
+import { useWebSocket } from '../../context/WebSocketContext';
+import { SocketRequests } from '../../hooks/useWebSocket';
 
 function Register() {
     const navigate = useNavigate();
@@ -9,6 +11,8 @@ function Register() {
     const [confirmPassword, setConfirmPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
+    const {sendMessage} = useWebSocket();
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -22,21 +26,8 @@ function Register() {
         }
 
         try {
-            const response = await fetch('/api/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username, password }),
-            });
-
-            if (response.ok) {
-                console.log('Registration successful');
-                navigate('/login');
-            } else {
-                const data = await response.json();
-                setError(data.message || 'Registration failed');
-            }
+            sendMessage(SocketRequests.register(username, password))
+            navigate("/login")
         } catch (err) {
             console.error('Error during registration:', err);
             setError('An error occurred during registration. Please try again!');
