@@ -37,7 +37,8 @@ function Login() {
                 loginSuccess(username, msg.data.RE_LOGIN_CODE);
             }
 
-            if (msg.type === "LOGIN" && msg.status === "error") {
+            if (msg.event === "LOGIN" && msg.status === "error") {
+                console.log(`Loi login ${msg.message}`)
                 setError(msg.message || "Login failed");
                 setLoading(false);
             }

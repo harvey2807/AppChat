@@ -5,14 +5,17 @@ import data from '@emoji-mart/data'
 import { ThemeContext } from '../../../context/ThemeContext'
 import DarkTheme from '../../../assets/images/dark.png'
 import LightTheme from '../../../assets/images/light.png'
+import { useWebSocket } from '../../../context/WebSocketContext'
+import { SocketRequests } from '../../../hooks/useWebSocket'
 
-const userName = "duy"
+const userName = localStorage.getItem("USER")
 
 function ChatOtherUser({ room, chatId }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
+    const {sendMessage} = useWebSocket()
     const messages = [
         { "id": 11077, "name": "tttt", "type": 0, "to": "duy", "mes": "Bạn ơi tối nay đi chơi được không. Mọi chi phí tôi lo, bạn chỉ cần đi thôi.", "createAt": "2025-12-12 07:31:12" },
         { "id": 11076, "name": "duy", "type": 0, "to": "tttt", "mes": "Ok luôn bạn ê.", "createAt": "2025-12-12 07:31:09" },
@@ -36,6 +39,8 @@ function ChatOtherUser({ room, chatId }) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
             // onSend?.(textareaRef.current.value);
+            const message = textareaRef.current.value;
+            sendMessage(SocketRequests.sendToRoom(chatId, message))
             textareaRef.current.value = "";
             textareaRef.current.style.height = "40px";
         }

@@ -17,7 +17,7 @@ export const useChatList = () => {
     useEffect(() => {
         // sendMessage(SocketRequests.login("luc", "12345"));
         console.log("isConnected:", isConnected, "isAuth:", isAuth);
-        if (isConnected && isAuth) {
+        if ( isAuth) {
             console.log("dcmmmmmmmmmmmmmmmmm")
             sendMessage(SocketRequests.getUserList());
             console.log("Length of users after request:", users.length);
