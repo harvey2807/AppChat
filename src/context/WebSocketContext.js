@@ -1,56 +1,57 @@
-import { useEffect, useRef, useCallback, useState, use } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
+import { useAuth } from "./AuthContext";
 
 const SOCKET_URL = "wss://chat.longapp.site/chat/chat";
+let socket = null;
 
 export const useWebSocket = () => {
-    const [isConnected, setIsConnected] = useState(false);
-    const [lastMessage, setLastMessage] = useState(null);
     const socketRef = useRef(null);
+    const [isConnected, setIsConnected] = useState(false);
 
-    useEffect(() => {
-        //init websocket only once
-        socketRef.current = new WebSocket(SOCKET_URL);
+    const connect = useCallback(() => {
+        if (socket && socket.readyState === WebSocket.OPEN) return;
 
-        //handle websocket events
-        socketRef.current.onopen = () => {
+        socket = new WebSocket(SOCKET_URL);
+        socketRef.current = socket;
+
+        socket.onopen = () => {
             console.log("WebSocket connected");
             setIsConnected(true);
         };
 
-        //handle websocket events when server sends a message
-        socketRef.current.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                console.log("WebSocket message received:", message);
-                setLastMessage(message);
-                const customEvent = new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message });
-                window.dispatchEvent(customEvent);
-            } catch (error) {
-                console.error("Error parsing WebSocket message:", error);
-            }
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            window.dispatchEvent(
+                new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message })
+            );
         };
 
-        socketRef.current.onclose = () => {
+        socket.onclose = () => {
             console.log("WebSocket disconnected");
             setIsConnected(false);
         };
+    }, []);
 
-        return () => {
-            if (socketRef.current) {
-                socketRef.current.close();
-            }
-        };
+    const disconnect = useCallback(() => {
+        socket?.close();
+        socket = null;
     }, []);
 
     const sendMessage = useCallback((payload) => {
-        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-            console.log("Sending WebSocket message:", payload);
-            socketRef.current.send(JSON.stringify(payload));
-        } else {
-            console.warn("WebSocket is not connected");
+        if (socket?.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify(payload));
         }
     }, []);
 
-    return { isConnected, lastMessage, sendMessage };
-
+    return { connect, disconnect, sendMessage, isConnected };
 };
+
+export function WebSocketProvider({ children }) {
+    const { connect, disconnect } = useWebSocket();
+    useEffect(() => {
+        connect();
+        return () => disconnect();
+    }, []);
+
+    return children;
+}

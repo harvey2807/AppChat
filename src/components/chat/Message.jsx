@@ -6,15 +6,11 @@ function Message() {
 
     const [filter, setFilter] = useState('all');
     const users = ListMess.users;
-    console.log("dcm users ne:", users);
-    console.log("Users in Message component:", users.type);
     const handleFilterChange = (selectedFilter) => {
         if (users.type === 0) {
             selectedFilter('all');
-            console.log(`asdasdasdasdasdasdasdasd`);
         } else if (users.type === 1) {
             selectedFilter('room');
-            console.log(`bbbbbbbbbbbbbbbbbbbbbb`);
         }
         console.log(`Filter changed to: ${selectedFilter}`);
 

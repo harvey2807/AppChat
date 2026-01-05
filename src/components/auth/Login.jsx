@@ -1,56 +1,51 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import './Login.css';
+import { useWebSocket } from '../../context/WebSocketContext';
+import { SocketRequests } from '../../hooks/useWebSocket';
+import { useAuth } from '../../context/AuthContext';
+import { useIsRTL } from 'react-bootstrap/esm/ThemeProvider';
 
 function Login() {
-    const navigate = useNavigate();
     const [username, setUsername] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
-
-    const handleSubmit = async (e) => {
+    const { sendMessage, isConnected, connect } = useWebSocket();
+    const { loginSuccess } = useAuth();
+    const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        try{
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({username, password}),
-            });
+        sendMessage(SocketRequests.login(username, password));
+        localStorage.setItem("USERNAME", username)
+    };
 
-            const data = await response.json();
+    useEffect(() => {
+        if (!isConnected) {
+            connect()
+        }
+    }, [])
 
-            if (response.ok) {
-                // Handle successful login
-                console.log('Login successful');
-                // Store token
-                if (data.token) {
-                    localStorage.setItem('authToken', data.token);
-                }
-                // Redirect
-                navigate('/app');
-            } else {
-                // Handle login error
-                console.log('Login failed');
-                setError(data.message || 'Login failed. Please check your credentials.');
+    useEffect(() => {
+        const handler = (e) => {
+            const msg = e.detail;
+            const username = localStorage.getItem("USERNAME")
+            console.log(username)
+            console.log(msg)
+            if (msg.event === "LOGIN" && msg.status === "success") {
+                loginSuccess(username, msg.data.RE_LOGIN_CODE);
             }
 
-            console.log('Login ok', data);
+            if (msg.type === "LOGIN" && msg.status === "error") {
+                setError(msg.message || "Login failed");
+                setLoading(false);
+            }
+        };
 
-            // Further processing based on response data here
-
-        }catch(err){
-            console.error('Error during login:', err);
-            setError('An error occurred during login. Please try again!');
-        }finally{
-            setLoading(false);
-        }
-    };
+        window.addEventListener("WS_MESSAGE_RECEIVED", handler);
+        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
+    }, [loginSuccess]);
 
     return (
         <div className="login-page">
@@ -94,4 +89,4 @@ function Login() {
     );
 }
 
-export  default Login;
+export default Login;

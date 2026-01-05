@@ -6,14 +6,11 @@ function ListMess({ onSelectChat, filter }) {
     const { users, onlineStatus, lastMessages } = useChatList();
     // 
     // 2. Logic lọc danh sách dựa trên filter
-    console.log("Current filter in ListMes hein tai deo co ai ");
     const filteredUsers = users.filter((user) => {
-        console.log("Current filter in ListMessdcdasdklasdklasd:", filter);
         if (filter === 'all') {
             return true; // Lấy hết
         }
         if (filter === 'room') {
-            console.log("Filtering for room type usersasdasdkjasdjlasdjlasdjlaskdjsladjalsjdlskadjlasdjlasdjlasjdlasjdlasjd");
             return user.type === 1;
         }
         return true;

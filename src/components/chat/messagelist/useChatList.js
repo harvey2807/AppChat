@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
+import { useAuth } from '../../../context/AuthContext';
 
 export const useChatList = () => {
     const { isConnected, sendMessage } = useWebSocket();
@@ -9,20 +10,32 @@ export const useChatList = () => {
     const [users, setUsers] = useState([]);
     const [onlineStatus, setOnlineStatus] = useState({});
     const [lastMessages, setLastMessages] = useState({});
-    
-    const checkQueueRef = useRef([]);
-    const currentUser = "luc"; 
+    const { isAuth } = useAuth()
 
+    const checkQueueRef = useRef([]);
+    const currentUser = localStorage.getItem("USER");    // Initialize: login and get list user
     useEffect(() => {
-        if (isConnected) {
-            sendMessage(SocketRequests.login("luc", "12345"));
+        // sendMessage(SocketRequests.login("luc", "12345"));
+        console.log("isConnected:", isConnected, "isAuth:", isAuth);
+        if (isConnected && isAuth) {
+            console.log("dcmmmmmmmmmmmmmmmmm")
             sendMessage(SocketRequests.getUserList());
+            console.log("Length of users after request:", users.length);
         }
-    }, [isConnected, sendMessage]);
+
+        console.log("Đã lấy xong list user")
+        // }
+    }, [isConnected, isAuth]);
+    // useEffect(() => {
+    //     if (isConnected) {
+    //         sendMessage(SocketRequests.login("luc", "12345"));
+    //         sendMessage(SocketRequests.getUserList());
+    //     }
+    // }, [isConnected, sendMessage]);
 
     useEffect(() => {
         if (isConnected && users.length > 0) {
-            checkQueueRef.current = []; 
+            checkQueueRef.current = [];
             users.forEach((user) => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
@@ -56,7 +69,7 @@ export const useChatList = () => {
         switch (event) {
             case "GET_USER_LIST":
                 if (Array.isArray(message.data)) {
-                    console.log("Received user list:", message.data);   
+                    console.log("Received user list:", message.data);
                     setUsers(message.data);
                 }
                 break;
@@ -80,9 +93,9 @@ export const useChatList = () => {
                 if (Array.isArray(message.data) && message.data.length > 0) {
                     const sortedMessages = message.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
                     const lastMessage = sortedMessages[0];
-                    
+
                     const key = lastMessage.name === currentUser ? lastMessage.to : lastMessage.name;
-                    
+
                     setLastMessages((prev) => ({
                         ...prev,
                         [key]: lastMessage

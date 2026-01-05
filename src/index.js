@@ -4,12 +4,18 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext';
+import { WebSocketProvider } from './context/WebSocketContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <ThemeProvider>
-    <App />
-  </ThemeProvider>
+  <AuthProvider>
+    <WebSocketProvider>
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </WebSocketProvider>
+  </AuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
