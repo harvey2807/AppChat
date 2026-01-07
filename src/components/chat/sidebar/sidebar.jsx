@@ -18,8 +18,12 @@ function Sidebar({ onFilterChange }) {
         if (onFilterChange) {
             onFilterChange(filter);
         }
+        
+        // Show Create button only when Room filter is selected
         if (filter === 'room') {
-            setChooseRoom(true)
+            setChooseRoom(true);
+        } else {
+            setChooseRoom(false);
         }
     }
     return (
@@ -38,7 +42,7 @@ function Sidebar({ onFilterChange }) {
                             <button type="button" onClick={() => handleClick('all')} className="btn btn-outline-success">All</button>
                             <button type="button" onClick={() => handleClick('room')} className="btn btn-outline-success">Room</button>
                             {chooseRoom && (
-                                <button type="button" className="btn join-btn"></button>
+                                <button type="button" className="btn btn-outline-success">Create</button>
                             )}
                         </div>
                     </div>
