@@ -10,7 +10,7 @@ function Login() {
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
-    const { sendMessage, isConnected, connect } = useWebSocket();
+    const { sendMessage, isConnected, connect, setIsAuthenticated } = useWebSocket();
     const { loginSuccess } = useAuth();
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -34,6 +34,7 @@ function Login() {
             console.log(username)
             console.log(msg)
             if (msg.event === "LOGIN" && msg.status === "success") {
+                setIsAuthenticated(true);
                 loginSuccess(username, msg.data.RE_LOGIN_CODE);
             }
 
@@ -45,7 +46,7 @@ function Login() {
 
         window.addEventListener("WS_MESSAGE_RECEIVED", handler);
         return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
-    }, [loginSuccess]);
+    }, [loginSuccess, setIsAuthenticated]);
 
     return (
         <div className="login-page">

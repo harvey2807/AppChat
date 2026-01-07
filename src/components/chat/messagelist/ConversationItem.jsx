@@ -1,6 +1,7 @@
 import { formatTime } from '../../../utils/formatTime';
 
 function ConversationItem({ user, isOnline, lastMessage }) {
+    // console.log("ConversationItem user:", user);
     return (
         <a href="#" className="list-group-item list-group-item-action">
             <div className="d-flex w-100 align-items-center justify-content-between">

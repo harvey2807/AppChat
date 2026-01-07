@@ -18,7 +18,7 @@ function ConsersationLayout() {
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChatId, setSelectedChatId] = useState(null)
-    const { isConnected, sendMessage } = useWebSocket();
+    const { isConnected, sendMessage, isAuthenticated, setIsAuthenticated } = useWebSocket();
     const { isAuth, reloginCode, user } = useAuth();
 
     const handleFilterChange = (type) => {
@@ -29,10 +29,32 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
-        if (isConnected && isAuth && reloginCode) {
+        if (isConnected && isAuth && reloginCode && !isAuthenticated) {
             sendMessage(SocketRequests.reLogin(user, reloginCode));
         }
-    }, [isConnected, isAuth, reloginCode]);
+    }, [isConnected, isAuth, reloginCode, isAuthenticated, sendMessage]);
+
+    useEffect(() => {
+        const handleReLoginSuccess = (e) => {
+            const msg = e.detail;
+            console.log("Handle relogin success ",   msg.event)
+            if (msg.event === "RE_LOGIN") {
+                setIsAuthenticated(true);
+                sendMessage(SocketRequests.getUserList());
+            }
+             if (msg.event === "AUTH") {
+                setIsAuthenticated(true);
+                sendMessage(SocketRequests.getUserList());
+            }
+            // Also handle direct LOGIN success (first time login)
+            if (msg.event === "LOGIN" && msg.status === "success") {
+                setIsAuthenticated(true);
+            }
+        };
+        window.addEventListener("WS_MESSAGE_RECEIVED", handleReLoginSuccess);
+        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handleReLoginSuccess);
+    }, [isAuthenticated]);
+
     return (
         <div className='chat-container'>
             {isMobile && (

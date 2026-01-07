@@ -1,14 +1,14 @@
 import './ListMess.css';
 import { useChatList } from './useChatList';
 import ConversationItem from './ConversationItem';
+import { use } from 'react';
 
 function ListMess({ onSelectChat, filter }) {
     const { users, onlineStatus, lastMessages } = useChatList();
-    // 
     // 2. Logic lọc danh sách dựa trên filter
     const filteredUsers = users.filter((user) => {
         if (filter === 'all') {
-            return true; // Lấy hết
+            return user.type === 0 || user.type === 1;
         }
         if (filter === 'room') {
             return user.type === 1;
@@ -16,7 +16,7 @@ function ListMess({ onSelectChat, filter }) {
         return true;
     });
     return (
-        <div className="chat-list">
+        <div className="chat-list"> 
             <div className="list-group list-group-flush">
                 {filteredUsers.map((user) => (
                     <ConversationItem
