@@ -14,12 +14,12 @@ function ConsersationLayout() {
     const navigate = useNavigate()
     const [room, setRoom] = useState(false)
     const [filterType, setFilterType] = useState('all');
-    console.log("Current filterType in ConsersationLayout:", filterType);
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
-    const [selectedChatId, setSelectedChatId] = useState(null)
+    const [selectedChat, setSelectedChat] = useState(null)
     const { isConnected, sendMessage } = useWebSocket();
     const { isAuth, reloginCode, user } = useAuth();
+    const [listMessages, setListMessages] = useState([])
 
     const handleFilterChange = (type) => {
         setFilterType(type);
@@ -29,10 +29,57 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
-        if (isConnected && isAuth && reloginCode) {
-            sendMessage(SocketRequests.reLogin(user, reloginCode));
+        if (isConnected && isAuth) {
+            sendMessage(SocketRequests.getUserList())
         }
-    }, [isConnected, isAuth, reloginCode]);
+    }, [isConnected, isAuth])
+
+    useEffect(() => {
+        if (!selectedChat) return
+        setListMessages([])
+        if (selectedChat.type === 1) {
+            console.log("Chat da duoc chon: " + selectedChat.name)
+            sendMessage(SocketRequests.getRoomMessages(selectedChat.name, 1))
+        } else {
+            console.log("Chat da duoc chon: " + selectedChat.name)
+            sendMessage(SocketRequests.getPeopleMessages(selectedChat.name, 1))
+        }
+    }, [selectedChat])
+
+
+    useEffect(() => {
+        const handler = (e) => {
+            const msg = e.detail;
+
+            if (
+                msg.event === "GET_PEOPLE_CHAT_MES" ||
+                msg.event === "GET_ROOM_CHAT_MES" &&
+                msg.chatName === selectedChat?.name
+            ) {
+
+                const messages = Array.isArray(msg.data) ? msg.data : [];
+                setListMessages(messages);
+                console.log("Bat duoc su kien : " + msg.event)
+            }
+            switch (msg.event) {
+                case "RE_LOGIN":
+                    sendMessage(SocketRequests.getUserList())
+                    break;
+                case "GET_USER_LIST":
+                    setSelectedChat(msg.data[0]);
+                    if (msg.data[0].type === 1) setRoom(true)
+                    else setRoom(false)
+                    break;
+
+                default:
+                    break;
+            }
+        };
+
+        window.addEventListener("WS_MESSAGE_RECEIVED", handler);
+        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
+    }, []);
+
     return (
         <div className='chat-container'>
             {isMobile && (
@@ -44,14 +91,14 @@ function ConsersationLayout() {
                         {showChatList && (
                             <div className='chat-left-content'>
                                 <Sidebar onFilterChange={handleFilterChange} />
-                                <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
+                                <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
                             </div>
                         )}
                     </div>
                     {!showChatList && (
                         <div className='chat-right'>
-                            <ChatOtherUser room={room} chatId={selectedChatId} />
-                            <InfoChat room={room} chatId={selectedChatId} />
+                            <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
+                            <InfoChat room={room} chat={selectedChat} />
                         </div>
                     )}
                 </>
@@ -62,14 +109,14 @@ function ConsersationLayout() {
                         <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         <div className='chat-left-content'>
                             <Sidebar onFilterChange={handleFilterChange} />
-                            <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
+                            <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
                         </div>
 
                     </div>
 
                     <div className='chat-right'>
-                        <ChatOtherUser room={room} chatId={selectedChatId} />
-                        <InfoChat room={room} chatId={selectedChatId} />
+                        <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
+                        <InfoChat room={room} chat={selectedChat} />
                     </div>
                 </>
             )}

@@ -1,8 +1,13 @@
 import { formatTime } from '../../../utils/formatTime';
 
-function ConversationItem({ user, isOnline, lastMessage }) {
+function ConversationItem({ user, isOnline, lastMessage,onClick }) {
     return (
-        <a href="#" className="list-group-item list-group-item-action">
+        <a
+            onClick={() => {
+                onClick()
+            }}
+            href="#"
+            className="list-group-item list-group-item-action">
             <div className="d-flex w-100 align-items-center justify-content-between">
                 <div className="d-flex align-items-center">
                     <div className="avatar me-3">

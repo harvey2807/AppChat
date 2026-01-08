@@ -1,6 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useAuth, setIsAuth } from "./AuthContext";
 import { SocketRequests } from "../hooks/useWebSocket";
+import { renderToReadableStream } from "react-dom/server";
 
 
 const SOCKET_URL = "wss://chat.longapp.site/chat/chat";
@@ -19,34 +20,31 @@ export const useWebSocket = () => {
         socket.onopen = () => {
             console.log("WebSocket connected");
             setIsConnected(true);
+            const reloginCode = localStorage.getItem("RE_LOGIN_CODE")
+            const user = localStorage.getItem("USER")
+            if (reloginCode && user) {
+                sendMessage(SocketRequests.reLogin(user, reloginCode))
+                sendMessage(SocketRequests.login("duy","123"))
+            }
         };
 
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
-            onMessage(message)
             window.dispatchEvent(
                 new CustomEvent("WS_MESSAGE_RECEIVED", { detail: message })
             );
         };
 
-        socket.onclose = () => {
-            console.log("WebSocket disconnected");
-            setIsConnected(false);
-        };
+        // socket.onclose = () => {
+        //     console.log("WebSocket disconnected");
+        //     setIsConnected(false);
+        // };
     }, []);
 
     const disconnect = useCallback(() => {
         socket?.close();
         socket = null;
     }, []);
-    const onMessage = (msg) => {
-        switch (msg.type) {
-            case "LOGIN":
-            case "RE_LOGIN":
-                sendMessage(SocketRequests.getUserList());
-                break;
-        }
-    };
     const sendMessage = useCallback((payload) => {
         if (socket?.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(payload));

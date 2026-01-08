@@ -10,32 +10,27 @@ export const useChatList = () => {
     const [users, setUsers] = useState([]);
     const [onlineStatus, setOnlineStatus] = useState({});
     const [lastMessages, setLastMessages] = useState({});
-    const { isAuth } = useAuth()
+    const { isAuth, chatWithUser, chatInRoom, dstUser, dstRoom } = useAuth()
+
 
     const checkQueueRef = useRef([]);
     const currentUser = localStorage.getItem("USER");    // Initialize: login and get list user
+
     useEffect(() => {
         // sendMessage(SocketRequests.login("luc", "12345"));
-        console.log("isConnected:", isConnected, "isAuth:", isAuth);
 
         if (isConnected || isAuth) {
-            console.log("dcmmmmmmmmmmmmmmmmm")
+            console.log("isConnected:", isConnected, "isAuth:", isAuth);
             sendMessage(SocketRequests.getUserList());
             console.log("Length of users after request:", users.length);
+            console.log("Đã lấy xong list user")
         }
 
-        console.log("Đã lấy xong list user")
         // }
-    }, [isConnected, isAuth]);
-    // useEffect(() => {
-    //     if (isConnected) {
-    //         sendMessage(SocketRequests.login("luc", "12345"));
-    //         sendMessage(SocketRequests.getUserList());
-    //     }
-    // }, [isConnected, sendMessage]);
+    }, [isConnected]);
 
     useEffect(() => {
-        if (isConnected && users.length > 0) {
+        if (isConnected || users.length > 0) {
             checkQueueRef.current = [];
             users.forEach((user) => {
                 if (user.name) {
@@ -48,19 +43,20 @@ export const useChatList = () => {
         }
     }, [isConnected, users, sendMessage]);
 
-    useEffect(() => {
-        if (isConnected || users.length > 0) {
-            users.forEach((user) => {
-                if (user.name) {
-                    if (user.type === 0) {
-                        sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
-                    } else if (user.type === 1) {
-                        sendMessage(SocketRequests.getRoomMessages(user.name, 1));
-                    }
-                }
-            });
-        }
-    }, [users, isConnected, sendMessage]);
+    // useEffect(() => {
+    //     if (isConnected || users.length > 0) {
+    //         users.forEach((user) => {
+    //             if (user.name) {
+    //                 console.log("MÉ sao kì vậy")
+    //                 if (user.type === 0) {
+    //                     sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
+    //                 } else if (user.type === 1) {
+    //                     sendMessage(SocketRequests.getRoomMessages(user.name, 1));
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }, [users, isConnected, sendMessage]);
 
     const handleSocketMessage = useCallback((e) => {
         const message = e.detail;
@@ -90,22 +86,24 @@ export const useChatList = () => {
                 break;
 
             case "GET_PEOPLE_CHAT_MES":
+                console.log("Danh sach tin nhan lay cua nguoi dung" + message.data)
+                break;
             case "GET_ROOM_CHAT_MES":
-                if (Array.isArray(message.data) && message.data.length > 0) {
-                    const sortedMessages = message.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                    const lastMessage = sortedMessages[0];
+                // if (Array.isArray(message.data) && message.data.length > 0) {
+                //     const sortedMessages = message.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                //     const lastMessage = sortedMessages[0];
 
-                    const key = lastMessage.name === currentUser ? lastMessage.to : lastMessage.name;
+                //     const key = lastMessage.name === currentUser ? lastMessage.to : lastMessage.name;
 
-                    setLastMessages((prev) => ({
-                        ...prev,
-                        [key]: lastMessage
-                    }));
-                }
+                //     setLastMessages((prev) => ({
+                //         ...prev,
+                //         [key]: lastMessage
+                //     }));
+                // }
                 break;
             default: break;
         }
-    }, [currentUser]);
+    }, []);
 
     useEffect(() => {
         window.addEventListener("WS_MESSAGE_RECEIVED", handleSocketMessage);

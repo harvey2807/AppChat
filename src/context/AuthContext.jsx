@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
   const [reloginCode, setReloginCode] = useState(null);
   const [dstUser, setDstUser] = useState("");
   const [dstRoom, setDstRoom] = useState("");
-
   // Restore session khi reload
   useEffect(() => {
     const storedUser = localStorage.getItem("USER");
@@ -28,6 +27,7 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("USER",user);
     localStorage.setItem("RE_LOGIN_CODE", code);
+    localStorage.setItem("RELOGIN_COUNT", 0)
   };
 
   const logout = () => {
@@ -53,6 +53,8 @@ export const AuthProvider = ({ children }) => {
         user,
         isAuth,
         reloginCode,
+        chatWithUser,
+        chatInRoom,
         loginSuccess,
         logout,
         dstUser,

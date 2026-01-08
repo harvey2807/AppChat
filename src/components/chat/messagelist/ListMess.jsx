@@ -1,8 +1,11 @@
 import './ListMess.css';
 import { useChatList } from './useChatList';
 import ConversationItem from './ConversationItem';
+import { useEffect } from 'react';
+import { useWebSocket } from '../../../context/WebSocketContext';
+import { SocketRequests } from '../../../hooks/useWebSocket';
 
-function ListMess({ onSelectChat, filter }) {
+function ListMess({ onSelectChat, filter, setRoom }) {
     const { users, onlineStatus, lastMessages } = useChatList();
     // 
     // 2. Logic lọc danh sách dựa trên filter
@@ -17,6 +20,7 @@ function ListMess({ onSelectChat, filter }) {
 
         return true;
     });
+
     return (
         <div className="chat-list">
             <div className="list-group list-group-flush">
@@ -26,7 +30,15 @@ function ListMess({ onSelectChat, filter }) {
                         user={user}
                         isOnline={onlineStatus[user.name]}
                         lastMessage={lastMessages[user.name]}
-                        onClick={() => onSelectChat(user.name)}
+                        onClick={() => {
+                            onSelectChat(user);
+                            if (user.type === 1) {
+                                setRoom(true)
+                            }
+                            else {
+                                setRoom(false)
+                            }
+                        }}
                     />
                 ))}
                 {filteredUsers.length === 0 && (
