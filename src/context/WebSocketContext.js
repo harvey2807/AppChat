@@ -7,6 +7,7 @@ const SOCKET_URL = "wss://chat.longapp.site/chat/chat";
 const WebSocketContext = createContext(null);
 
 // Provider component - owns all WebSocket state and logic
+// at here we need to use singleton partern to make sure only one websocket connection is created
 export function WebSocketProvider({ children }) {
     const socketRef = useRef(null);
     const [isConnected, setIsConnected] = useState(false);
@@ -21,17 +22,18 @@ export function WebSocketProvider({ children }) {
         socket.onopen = () => {
             console.log("WebSocket connected");
             setIsConnected(true);
+            // sendMessage(SocketRequests.getUserList());
         };
 
         socket.onmessage = (event) => {
             const message = JSON.parse(event.data);
             
             // Log ALL messages to see what's coming back
-            console.log("📬 Received:", message.event, message.status);
+            console.log("Received:", message.event, message.status);
             
             // Log people message responses specifically
             if (message.event === "GET_PEOPLE_CHAT_MES") {
-                console.log("🔵 GET_PEOPLE_CHAT_MES received:", JSON.stringify(message, null, 2));
+                console.log("GET_PEOPLE_CHAT_MES received:", JSON.stringify(message, null, 2));
             }
             
             window.dispatchEvent(

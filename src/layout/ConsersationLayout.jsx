@@ -14,7 +14,6 @@ function ConsersationLayout() {
     const navigate = useNavigate()
     const [room, setRoom] = useState(false)
     const [filterType, setFilterType] = useState('all');
-    console.log("Current filterType in ConsersationLayout:", filterType);
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChatId, setSelectedChatId] = useState(null)
@@ -29,26 +28,59 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
-        if (isConnected && isAuth && reloginCode && !isAuthenticated) {
+        if (!isConnected && isAuthenticated) {
+            console.log("Socket disconnected, resetting isAuthenticated to false");
+            setIsAuthenticated(false);
+        } else {
+            console.log("Socket connection status:", isConnected, "| isAuthenticated:", isAuthenticated);
+        }
+
+    }, [isConnected, isAuthenticated]);
+
+    useEffect(() => {
+        if ((isConnected || !isConnected) && isAuth && reloginCode && (isAuthenticated || !isAuthenticated)) {
+            console.log("Attempting re-login for user:", user);
             sendMessage(SocketRequests.reLogin(user, reloginCode));
+        } else {
+            console.log("Re-login conditions:", {
+                isConnected,
+                isAuth,
+                hasReloginCode: !!reloginCode,
+                isAuthenticated
+            });
+
         }
     }, [isConnected, isAuth, reloginCode, isAuthenticated, sendMessage]);
 
     useEffect(() => {
         const handleReLoginSuccess = (e) => {
             const msg = e.detail;
-            console.log("Handle relogin success ",   msg.event)
-            if (msg.event === "RE_LOGIN") {
-                setIsAuthenticated(true);
-                sendMessage(SocketRequests.getUserList());
+            console.log("Handle relogin success ", msg.event)
+            setIsAuthenticated(true);
+            try {
+                if (msg.event === "RE_LOGIN" && msg.status === "success") {
+                    console.log("ReLogin successful for user:", msg.event);
+                    //setIsAuthenticated(true);
+                    sendMessage(SocketRequests.getUserList());
+                    // const list = sendMessage(SocketRequests.getUserList());
+                    // console.log("ReLogin successfulllll for user:", msg.event);
+                    // }
+                    //  if (msg.event === "AUTH") {
+                    //     setIsAuthenticated(true);
+                    //     sendMessage(SocketRequests.getUserList());
+                    // }
+                    // Also handle direct LOGIN success (first time login)
+                    // else if (msg.event === "LOGIN" && msg.status === "success") {
+
+                    //     console.log("login sucessfull at the first time");
+                    //     setIsAuthenticated(true);
+                } else {
+                    //why check here 
+                    console.log("ReLogin failed or other event:", msg.event, msg.mes);
+                }
             }
-             if (msg.event === "AUTH") {
-                setIsAuthenticated(true);
-                sendMessage(SocketRequests.getUserList());
-            }
-            // Also handle direct LOGIN success (first time login)
-            if (msg.event === "LOGIN" && msg.status === "success") {
-                setIsAuthenticated(true);
+            catch (err) {
+                console.log("Error handling re-login success:", err)
             }
         };
         window.addEventListener("WS_MESSAGE_RECEIVED", handleReLoginSuccess);
