@@ -24,7 +24,7 @@ export const useWebSocket = () => {
             const user = localStorage.getItem("USER")
             if (reloginCode && user) {
                 sendMessage(SocketRequests.reLogin(user, reloginCode))
-                sendMessage(SocketRequests.login("duy","123"))
+                sendMessage(SocketRequests.login(user, localStorage.getItem("PASSWORD")))
             }
         };
 

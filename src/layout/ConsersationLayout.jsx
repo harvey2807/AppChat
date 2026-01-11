@@ -18,8 +18,11 @@ function ConsersationLayout() {
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChat, setSelectedChat] = useState(null)
     const { isConnected, sendMessage } = useWebSocket();
-    const { isAuth, reloginCode, user } = useAuth();
+    const { isAuth, user } = useAuth();
     const [listMessages, setListMessages] = useState([])
+    const [isInRoom, setIsInRoom] = useState(false);
+    const [error, setError] = useState('')
+    const [listMemberInRoom, setListMemberInRoom] = useState([])
 
     const handleFilterChange = (type) => {
         setFilterType(type);
@@ -29,38 +32,33 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
-        if (isConnected && isAuth) {
+        if (isAuth) {
             sendMessage(SocketRequests.getUserList())
         }
-    }, [isConnected, isAuth])
+    }, [])
 
     useEffect(() => {
         if (!selectedChat) return
+        setIsInRoom(false)
         setListMessages([])
+        setListMemberInRoom([])
+
         if (selectedChat.type === 1) {
+            // checkInRoom(selectedChat)
             console.log("Chat da duoc chon: " + selectedChat.name)
             sendMessage(SocketRequests.getRoomMessages(selectedChat.name, 1))
         } else {
             console.log("Chat da duoc chon: " + selectedChat.name)
             sendMessage(SocketRequests.getPeopleMessages(selectedChat.name, 1))
         }
+
     }, [selectedChat])
 
 
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
-
-            if (
-                msg.event === "GET_PEOPLE_CHAT_MES" ||
-                msg.event === "GET_ROOM_CHAT_MES" &&
-                msg.chatName === selectedChat?.name
-            ) {
-
-                const messages = Array.isArray(msg.data) ? msg.data : [];
-                setListMessages(messages);
-                console.log("Bat duoc su kien : " + msg.event)
-            }
+            console.log("BẮt được sự kiện rồi 1 - " + msg.event)
             switch (msg.event) {
                 case "RE_LOGIN":
                     sendMessage(SocketRequests.getUserList())
@@ -70,7 +68,20 @@ function ConsersationLayout() {
                     if (msg.data[0].type === 1) setRoom(true)
                     else setRoom(false)
                     break;
-
+                case "GET_PEOPLE_CHAT_MES":
+                    const messOfPeople = Array.isArray(msg.data) ? msg.data : [];
+                    setListMessages(messOfPeople);
+                    break;
+                case "GET_ROOM_CHAT_MES":
+                    const messOfRoom = msg.data.chatData.length ? msg.data.chatData : [];
+                    const joined = Array.isArray(msg.data?.userList)
+                        && msg.data.userList.some(u => u.name === user);
+                    setListMemberInRoom(msg.data.userList)
+                    setIsInRoom(joined);
+                    console.log("Đã gửi tin nhắn rồi này " + joined)
+                    if (!joined) setError("Hãy tham gia phòng để gửi tin nhắn!")
+                    setListMessages(messOfRoom);
+                    break;
                 default:
                     break;
             }
@@ -91,14 +102,14 @@ function ConsersationLayout() {
                         {showChatList && (
                             <div className='chat-left-content'>
                                 <Sidebar onFilterChange={handleFilterChange} />
-                                <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
+                                <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} setShowChatList={setShowChatList} />
                             </div>
                         )}
                     </div>
                     {!showChatList && (
                         <div className='chat-right'>
-                            <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
-                            <InfoChat room={room} chat={selectedChat} />
+                            <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} isInRoom={isInRoom} error={error} />
+                            <InfoChat room={room} chat={selectedChat} mess={listMessages} listMemberInRoom={listMemberInRoom} />
                         </div>
                     )}
                 </>
@@ -109,14 +120,14 @@ function ConsersationLayout() {
                         <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         <div className='chat-left-content'>
                             <Sidebar onFilterChange={handleFilterChange} />
-                            <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
+                            <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} setShowChatList={setShowChatList}  />
                         </div>
 
                     </div>
 
                     <div className='chat-right'>
-                        <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
-                        <InfoChat room={room} chat={selectedChat} />
+                        <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} isInRoom={isInRoom} error={error} />
+                        <InfoChat room={room} chat={selectedChat} mess={listMessages} listMemberInRoom={listMemberInRoom} />
                     </div>
                 </>
             )}

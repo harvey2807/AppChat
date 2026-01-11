@@ -19,6 +19,7 @@ function Login() {
 
         sendMessage(SocketRequests.login(username, password));
         localStorage.setItem("USERNAME", username)
+        localStorage.setItem("PASSWORD", password)
     };
 
     useEffect(() => {
