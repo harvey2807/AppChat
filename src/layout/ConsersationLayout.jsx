@@ -1,5 +1,5 @@
 import './ChatLayout.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/chat/sidebar/sidebar.jsx';
 import ListMess from '../components/chat/messagelist/ListMess.jsx';
 import ChatOtherUser from '../components/chat/chatOtherUser/ChatOtherUser.jsx';
@@ -17,12 +17,15 @@ function ConsersationLayout() {
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChat, setSelectedChat] = useState(null)
-    const { isConnected, sendMessage } = useWebSocket();
+    const { isConnected, sendMessage, connect } = useWebSocket();
     const { isAuth, user } = useAuth();
     const [listMessages, setListMessages] = useState([])
     const [isInRoom, setIsInRoom] = useState(false);
-    const [error, setError] = useState('')
     const [listMemberInRoom, setListMemberInRoom] = useState([])
+    const [hasMore, setHasMore] = useState(true);
+    const [page, setPage] = useState(1);
+    const selectedChatRef = useRef(null);
+
 
     const handleFilterChange = (type) => {
         setFilterType(type);
@@ -32,6 +35,10 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
+        selectedChatRef.current = selectedChat;
+    }, [selectedChat]);
+
+    useEffect(() => {
         if (isAuth) {
             sendMessage(SocketRequests.getUserList())
         }
@@ -39,10 +46,11 @@ function ConsersationLayout() {
 
     useEffect(() => {
         if (!selectedChat) return
+        setPage(1);
+        setHasMore(true);
         setIsInRoom(false)
         setListMessages([])
         setListMemberInRoom([])
-
         if (selectedChat.type === 1) {
             // checkInRoom(selectedChat)
             console.log("Chat da duoc chon: " + selectedChat.name)
@@ -54,33 +62,74 @@ function ConsersationLayout() {
 
     }, [selectedChat])
 
+    const loadMoreMessages = () => {
+        if (!hasMore || !selectedChat) return;
+
+        const nextPage = page + 1;
+        setPage(nextPage);
+
+        if (selectedChat.type === 1) {
+            sendMessage(SocketRequests.getRoomMessages(selectedChat.name, nextPage));
+        } else {
+            sendMessage(SocketRequests.getPeopleMessages(selectedChat.name, nextPage));
+        }
+    };
+    const isChatActive = (chatName, type) => {
+        return (
+            selectedChat &&
+            selectedChat.name === chatName &&
+            selectedChat.type === type
+        );
+    };
+
 
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
+
             console.log("BẮt được sự kiện rồi 1 - " + msg.event)
             switch (msg.event) {
                 case "RE_LOGIN":
                     sendMessage(SocketRequests.getUserList())
                     break;
                 case "GET_USER_LIST":
-                    setSelectedChat(msg.data[0]);
-                    if (msg.data[0].type === 1) setRoom(true)
-                    else setRoom(false)
+                    // CHỈ set lần đầu khi chưa có chat nào được chọn
+                    if (!selectedChatRef.current && msg.data.length > 0) {
+                        setSelectedChat(msg.data[0]);
+                        setRoom(msg.data[0].type === 1);
+                    }
                     break;
                 case "GET_PEOPLE_CHAT_MES":
-                    const messOfPeople = Array.isArray(msg.data) ? msg.data : [];
-                    setListMessages(messOfPeople);
+                    const messOfPeople = msg.data.length ? msg.data : [];
+                    if (!messOfPeople || messOfPeople.length === 0) {
+                        setHasMore(false);
+                        return;
+                    }
+                    setListMessages(prev => {
+                        const map = new Map();
+                        prev.forEach(m => map.set(m.id, m));
+                        messOfPeople.forEach(m => map.set(m.id, m));
+                        return Array.from(map.values());
+                    });
                     break;
                 case "GET_ROOM_CHAT_MES":
                     const messOfRoom = msg.data.chatData.length ? msg.data.chatData : [];
+                    if (!messOfRoom || messOfRoom.length === 0) {
+                        setHasMore(false);
+                        return;
+                    }
+
                     const joined = Array.isArray(msg.data?.userList)
                         && msg.data.userList.some(u => u.name === user);
                     setListMemberInRoom(msg.data.userList)
                     setIsInRoom(joined);
-                    console.log("Đã gửi tin nhắn rồi này " + joined)
-                    if (!joined) setError("Hãy tham gia phòng để gửi tin nhắn!")
-                    setListMessages(messOfRoom);
+
+                    setListMessages(prev => {
+                        const map = new Map();
+                        prev.forEach(m => map.set(m.id, m));
+                        messOfRoom.forEach(m => map.set(m.id, m));
+                        return Array.from(map.values());
+                    });
                     break;
                 default:
                     break;
@@ -102,14 +151,30 @@ function ConsersationLayout() {
                         {showChatList && (
                             <div className='chat-left-content'>
                                 <Sidebar onFilterChange={handleFilterChange} />
-                                <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} setShowChatList={setShowChatList} />
+                                <ListMess
+                                    onSelectChat={setSelectedChat}
+                                    filter={filterType}
+                                    setRoom={setRoom}
+                                    setShowChatList={setShowChatList} />
                             </div>
                         )}
                     </div>
                     {!showChatList && (
                         <div className='chat-right'>
-                            <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} isInRoom={isInRoom} error={error} />
-                            <InfoChat room={room} chat={selectedChat} mess={listMessages} listMemberInRoom={listMemberInRoom} />
+                            <ChatOtherUser
+                                room={room}
+                                chat={selectedChat}
+                                mess={listMessages}
+                                setListMessages={setListMessages}
+                                isInRoom={isInRoom}
+                                hasMore={hasMore}
+                                onLoadMore={loadMoreMessages}
+                                isActive={isChatActive} />
+                            <InfoChat
+                                room={room}
+                                chat={selectedChat}
+                                mess={listMessages}
+                                listMemberInRoom={listMemberInRoom} />
                         </div>
                     )}
                 </>
@@ -120,14 +185,30 @@ function ConsersationLayout() {
                         <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         <div className='chat-left-content'>
                             <Sidebar onFilterChange={handleFilterChange} />
-                            <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} setShowChatList={setShowChatList}  />
+                            <ListMess
+                                onSelectChat={setSelectedChat}
+                                filter={filterType}
+                                setRoom={setRoom}
+                                setShowChatList={setShowChatList} />
                         </div>
 
                     </div>
 
                     <div className='chat-right'>
-                        <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} isInRoom={isInRoom} error={error} />
-                        <InfoChat room={room} chat={selectedChat} mess={listMessages} listMemberInRoom={listMemberInRoom} />
+                        <ChatOtherUser
+                            room={room}
+                            chat={selectedChat}
+                            mess={listMessages}
+                            setListMessages={setListMessages}
+                            isInRoom={isInRoom}
+                            hasMore={hasMore}
+                            onLoadMore={loadMoreMessages}
+                            isActive={isChatActive} />
+                        <InfoChat
+                            room={room}
+                            chat={selectedChat}
+                            mess={listMessages}
+                            listMemberInRoom={listMemberInRoom} />
                     </div>
                 </>
             )}

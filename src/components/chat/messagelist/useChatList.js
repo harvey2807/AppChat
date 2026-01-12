@@ -11,7 +11,6 @@ export const useChatList = () => {
     const [onlineStatus, setOnlineStatus] = useState({});
     const [lastMessages, setLastMessages] = useState({});
     const { isAuth } = useAuth()
-    const [count, setCount] = useState(0);
 
 
     const checkQueueRef = useRef([]);
@@ -36,7 +35,6 @@ export const useChatList = () => {
                 } else {
                     sendMessage(SocketRequests.getRoomMessages(user.name, 1));
                 }
-                setCount(count + 1)
             });
         }
     }, []);
@@ -111,7 +109,7 @@ export const useChatList = () => {
             //     break;
             default: break;
         }
-    }, [users, count]);
+    }, [users]);
 
     useEffect(() => {
         window.addEventListener("WS_MESSAGE_RECEIVED", handleSocketMessage);

@@ -35,10 +35,11 @@ export const useWebSocket = () => {
             );
         };
 
-        // socket.onclose = () => {
-        //     console.log("WebSocket disconnected");
-        //     setIsConnected(false);
-        // };
+        socket.onclose = () => {
+            console.log("WebSocket disconnected");
+            setIsConnected(false);
+            if (!isConnected) connect();
+        };
     }, []);
 
     const disconnect = useCallback(() => {

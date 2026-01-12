@@ -12,14 +12,14 @@ import { SocketRequests } from "../../../hooks/useWebSocket";
 
 const userName = localStorage.getItem("USER")
 
-function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
+function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
 
-    const { sendMessage , isConnected} = useWebSocket();
-    const srcUser = useAuth().user?.username || "";
+    const { sendMessage, isConnected } = useWebSocket();
+    const { user } = useAuth();
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
     const [isFile, setIsFile] = useState(false);
@@ -27,17 +27,33 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const bottomRef = useRef(null);
     const chatContainerRef = useRef(null);
     const isAtBottomRef = useRef(true);
+    const [error, setError] = useState("Hãy tham gia phòng để gửi tin nhắn!");
+
+    const prevScrollHeightRef = useRef(0);
 
     const handleScroll = () => {
         const el = chatContainerRef.current;
-        if (!el) return;
+        if (!el || !hasMore) return;
 
-        const threshold = 50; // px
+        const thresholdTop = 20;
+        const thresholdBottom = 50;
+
+        // 👇 CHỈ ghi scrollHeight khi sắp load thêm
+        if (el.scrollTop <= thresholdTop) {
+            prevScrollHeightRef.current = el.scrollHeight;
+            onLoadMore(); // gọi CHA
+            return; // ⛔ QUAN TRỌNG: dừng luôn
+        }
+
+        // 👇 chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
         isAtBottomRef.current =
-            el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
+            el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
     };
+
     useEffect(() => {
         if (!chat) return;
+        if(!isActive(chat.name, chat.type)) return;
+        console.log("Chat đang active : " + isActive(chat.name, chat.type))
         const interval = setInterval(() => {
             if (chat.type === 1) {
                 sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
@@ -51,11 +67,36 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
+        if (!isAtBottomRef.current) return;
 
-        if (!isAtBottomRef.current) return; // 👈 QUAN TRỌNG
+    }, [mess]);
+    useLayoutEffect(() => {
+        const el = chatContainerRef.current;
+        if (!el) return;
 
-        bottomRef.current.scrollIntoView({ behavior: "auto" });
-    }, [mess, chat, isConnected]);
+        // 1️⃣ Load thêm tin cũ → giữ vị trí
+        if (prevScrollHeightRef.current > 0) {
+            el.scrollTop =
+                el.scrollHeight - prevScrollHeightRef.current;
+            prevScrollHeightRef.current = 0;
+            return;
+        }
+
+        // 2️⃣ User đang ở đáy → auto scroll
+        if (isAtBottomRef.current) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }, [mess.length, chat, isConnected]);
+    useEffect(() => {
+        isAtBottomRef.current = true;
+        prevScrollHeightRef.current = 0;
+
+        requestAnimationFrame(() => {
+            const el = chatContainerRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        });
+    }, [chat?.id]);
+
 
     async function uploadImageToCloudinary(file) {
         const formData = new FormData()
@@ -94,13 +135,13 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            // const message = textareaRef.current.value;
-            // sendMessage(SocketRequests.sendToRoom(chatId, message))
+
             setUploading(true)
             sendNude();
             textareaRef.current.value = "";
             textareaRef.current.style.height = "40px";
             setUploading(false)
+
         }
     };
     const { theme, toggleTheme } = useContext(ThemeContext)
@@ -136,11 +177,14 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
             // check whether send message to room or people
             if (room && isInRoom) {
                 sendMessage(SocketRequests.sendToRoom(chat.name, imageUrl));
-                sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
+                //append ngay cho UI
+                handleSendMessage(chat.name, chat.type, imageUrl)
+                // sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
 
-            } else if(!room){
+            } else if (!room) {
                 sendMessage(SocketRequests.sendToPeople(chat.name, imageUrl));
-                sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
+                handleSendMessage(chat.name, chat.type, imageUrl)
+                // sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
             }
         }
         // get msg text
@@ -157,20 +201,36 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
         console.log("Message packaging...");
         // check whether send message to room or people
         console.log(`Room :${room}, In Room: ${isInRoom}, Chat type: ${chat.type}`)
-        if (room && isInRoom && chat.type === 1) {
+        if (room && isInRoom) {
             const packet = SocketRequests.sendToRoom(chat.name, msgText);
             console.log("Sending packet:", packet);
+            handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
-            sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
-        } else if(!room) {
+            // sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
+        } else if (!room) {
             const packet = SocketRequests.sendToPeople(chat.name, msgText);
             console.log("Sending packet:", packet);
+            handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
-            sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
+            // sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
         }
         setUploading(false)
         return;
     }
+
+    const handleSendMessage = (chatName, type, msg) => {
+        const chatType = type === 1 ? 'room' : 'people';
+        console.log("Chat type là " + chatType)
+        //  append local message
+        setListMessages(prev => [{
+            id: `local-${Date.now()}`,
+            name: user,
+            type: chatType,
+            to: chatName,
+            mes: msg,
+            createAt: new Date().toISOString()
+        }, ...prev]);
+    };
 
     return (
         <>
@@ -201,7 +261,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
                     })}
                     {/* Mốc để scroll */}
                     <div ref={bottomRef} />
-                    {room && !isInRoom && error !== '' && (
+                    {room && !isInRoom && (
                         <div className='error-box slide-up'>
                             <span className='error-noti'> {error}</span>
                         </div>
@@ -211,7 +271,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
                 {selectedFile && (
                     <>
-                        <ImagePreview file={selectedFile} className="image-preview" />
+                        <ImagePreview file={selectedFile} onRemoveImage={setSelectedFile} className="image-preview" />
                     </>
                 )}
                 <div className="chat-input">
@@ -285,7 +345,7 @@ function Message(msg, room) {
             <div key={msg.id} className="message other">
                 <button className='avt' style={{ width: 15, height: 15 }} />
                 <div className="message-box">
-                    {room && (<p className='sender-mess'>Duy đã gửi tin nhắn</p>)}
+                    {room && (<p className='sender-mess'>{msg.name} đã gửi tin nhắn</p>)}
                     <div className="message-content">
                         {isCloudinaryImage(msg.mes) ? (
                             <img
@@ -336,7 +396,7 @@ function ImagePicker({ onSelect }) {
         </>
     )
 }
-function ImagePreview({ file }) {
+function ImagePreview({ file, onRemoveImage }) {
     const [preview, setPreview] = useState(null)
 
     useEffect(() => {
@@ -349,10 +409,14 @@ function ImagePreview({ file }) {
     }, [file])
 
     if (!preview) return null
+    const removeImage = () => {
+        onRemoveImage(null)
+        setPreview(null)
+    }
 
     return (
         <div className='image-preview'>
-            <button className='remove-image'>x</button>
+            <button className='remove-image' onClick={() => removeImage()}>x</button>
             <img
                 src={preview}
                 alt="preview"
