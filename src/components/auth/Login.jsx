@@ -37,7 +37,11 @@ function Login() {
                 setIsAuthenticated(true);
                 console.log("Login successful for usersrrrrr:", msg.event);
                 loginSuccess(username, msg.data.RE_LOGIN_CODE);
-            }else if (msg.event === "LOGIN" && msg.status === "error") {
+
+            }
+
+            if (msg.event === "LOGIN" && msg.status === "error") {
+                console.log(`Loi login ${msg.message}`)
                 setError(msg.message || "Login failed");
                 setLoading(false);
             }

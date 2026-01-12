@@ -8,7 +8,7 @@ import downloadLightBtn from '../../../assets/images/download-light.png'
 import { ThemeContext } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useWebSocket } from '../../../context/WebSocketContext';
-function InfoChat({ room, chatId }) {
+function InfoChat({ room, chat }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
     const [showInforUser, setShowInforUser] = useState(false);
@@ -63,13 +63,13 @@ function InfoChat({ room, chatId }) {
                         {room && (
                             <div className="inforOtherUser">
                                 <div className="room-avt"></div>
-                                <p>Tên phòng</p>
+                                <p>{chat !== null ? chat.name: "User"}</p>
                             </div>
                         )}
                         {!room && (
                             <div className="inforOtherUser">
                                 <div className="avt"></div>
-                                <p>Tên người dùng</p>
+                                <p>{chat !== null ? chat.name: "User"}</p>
                             </div>
                         )}
 

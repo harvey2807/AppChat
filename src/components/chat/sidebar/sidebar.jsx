@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./sidebar.css";
-import { useWebSocket } from "../../../context/WebSocketContext";
-import { SocketRequests } from "../../../hooks/useWebSocket";
+import {useWebSocket} from "../../../context/WebSocketContext";
+import {SocketRequests} from "../../../hooks/useWebSocket";
 // import 'bootstrap/dist/css/bootstrap.min.css';
 
 //here we need to catch api get user list 
@@ -10,10 +10,15 @@ function Sidebar({ onFilterChange }) {
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [chooseRoom, setChooseRoom] = useState(false);
     const [roomName, setRoomName] = useState(''); 
-    const { sendMessage, isConnected, isAuthenticated } = useWebSocket();
+
+    // const [chooseRoom, setChooseRoom] = useState(false)
+    const { sendMessage, isConnected } = useWebSocket();
+    const [searchQuery, setSearchQuery] = useState("");
+
     // const handleChooseRoom = () => {
     //     setChooseRoom(prev => !prev)
     // }
+
     const handleClick = (filter) => {
         setSelectedFilter(filter);
         console.log(`Filter selected: ${filter}`);
@@ -37,7 +42,7 @@ function Sidebar({ onFilterChange }) {
             return;
         }
 
-        if (!isConnected || !isAuthenticated) {
+        if (!isConnected ) {
             alert('Chưa kết nối hoặc chưa đăng nhập!');
             return;
         }
@@ -46,6 +51,38 @@ function Sidebar({ onFilterChange }) {
         sendMessage(SocketRequests.createRoom(roomName));
         setRoomName('');
     }
+    const handleSearch = (e) => {
+        e.preventDefault();
+        // check searchQuery
+        if (!searchQuery) {
+            console.log("Search query empty");
+            return;
+        }
+
+        // check websocket connection
+        if (!isConnected) {
+            console.log("WebSocket not connected");
+            return;
+        }
+
+        // further implementation here
+
+    }
+
+    const handeJoinRoom = (e) => {
+        e.preventDefault();
+        // check searchQuery
+        if (!searchQuery.trim()) {
+            console.log("Search query empty");
+            return;
+        }
+
+        // further implementation here
+
+        const packet = SocketRequests.joinRoom(searchQuery);
+        console.log(sendMessage(packet));
+    }
+
     return (
         <div className="sidebar-container">
             <div className="chat-sidebar">
@@ -62,6 +99,7 @@ function Sidebar({ onFilterChange }) {
                                 value={roomName}
                                 onChange={(e) => setRoomName(e.target.value)}
                             />
+
                             <button className="btn btn-outline-success" type="submit">Search</button>
                         </form>
                         <div className="filter-buttons d-flex gap-2">
@@ -71,6 +109,7 @@ function Sidebar({ onFilterChange }) {
                             <button type="button" onClick={() => handleClick('room')} className="btn btn-outline-success">Room</button>
                             {chooseRoom && (
                                 <button type="button" onClick={handleCreateRoom} className="btn btn-outline-success">Create</button>
+                                // <button type="button" className="btn join-btn" onClick={handeJoinRoom}></button>
                             )}
                         </div>
                     </div>

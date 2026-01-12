@@ -9,55 +9,32 @@ export const useChatList = () => {
     const [onlineStatus, setOnlineStatus] = useState({});
     const [lastMessages, setLastMessages] = useState({});
     const [loadingMessages, setLoadingMessages] = useState({});
-    const { isAuth } = useAuth();
 
-    const checkQueueRef = useRef([]);
     const onlineCheckCountRef = useRef(0);
     const hasRequestedUserListRef = useRef(false);
     const hasCheckedOnlineRef = useRef(false);
     const fetchedMessagesRef = useRef(new Set());
     const messageQueueRef = useRef([]);
     const isProcessingQueueRef = useRef(false);
-    const currentUser = localStorage.getItem("USER");
+
+    const { isAuth, chatWithUser, chatInRoom, dstUser, dstRoom } = useAuth()
+
+
+    const checkQueueRef = useRef([]);
+    const currentUser = localStorage.getItem("USER");    // Initialize: login and get list user
 
     useEffect(() => {
-        console.log("Connection or authentication status changed");
-        if ((!isConnected || isConnected) && (isAuthenticated || !isAuthenticated) && !hasRequestedUserListRef.current) {
-            console.log("Requesting user list...");
+        // sendMessage(SocketRequests.login("luc", "12345"));
+
+        if (isConnected || isAuth) {
+            console.log("isConnected:", isConnected, "isAuth:", isAuth);
             sendMessage(SocketRequests.getUserList());
-            hasRequestedUserListRef.current = true;
+            console.log("Length of users after request:", users.length);
+            console.log("Đã lấy xong list user")
         }
 
-        // Reset ALL refs when disconnected OR when not authenticated
-        if (!isConnected || !isAuthenticated) {
-            hasRequestedUserListRef.current = false;
-            hasCheckedOnlineRef.current = false;
-            onlineCheckCountRef.current = 0;
-            fetchedMessagesRef.current.clear();
-            messageQueueRef.current = [];
-            isProcessingQueueRef.current = false;
-        }
-    }, [isConnected, isAuthenticated]);
-
-
-    // useEffect(() => {
-    //     if (isConnected && isAuthenticated && users.length > 0 && !hasCheckedOnlineRef.current) {
-    //         console.log(`Checking online status for ${users.length} users`);
-    //         checkQueueRef.current = [];
-    //         onlineCheckCountRef.current = 0;
-
-    //         users.forEach((user, index) => {
-    //             if (user.name) {
-    //                 setTimeout(() => {
-    //                     checkQueueRef.current.push(user.name);
-    //                     sendMessage(SocketRequests.checkUserOnline(user.name));
-    //                 }, index * 200);
-    //             }
-    //         });
-
-    //         hasCheckedOnlineRef.current = true;
-    //     }
-    // }, [users, isConnected, isAuthenticated]);
+        // }
+    }, [isConnected]);
 
     // const fetchMessagesForUser = useCallback((userName, userType) => {
     //     if (fetchedMessagesRef.current.has(userName) || loadingMessages[userName]) {
@@ -82,24 +59,21 @@ export const useChatList = () => {
     // }
     // }, [isConnected, isAuthenticated, sendMessage]);
     useEffect(() => {
-        if (
-            isConnected &&
-            isAuthenticated &&
-            users.length > 0 &&
-            onlineCheckCountRef.current === users.length &&
-            messageQueueRef.current.length === 0
-        ) {
-            console.log(`Setting up queue for ${users.length} conversations`);
 
-            const recentUsers = [...users]
-                .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                .slice(0, 13);
+        if (isConnected || users.length > 0) {
+            checkQueueRef.current = [];
+            users.forEach((user) => {
+                if (user.name) {
+                    checkQueueRef.current.push(user.name);
 
-            messageQueueRef.current = recentUsers;
-
-            processNextMessage();
+                    const recentUsers = [...users]
+                        .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
+                        .slice(0, 13);
+                    messageQueueRef.current = recentUsers;
+                }
+            });
         }
-    }, [users, isConnected, isAuthenticated, onlineCheckCountRef.current]);
+    }, [isConnected, users, sendMessage]);
 
     const processNextMessage = useCallback(() => {
         if (!isConnected || !isAuthenticated) {
@@ -136,6 +110,20 @@ export const useChatList = () => {
         }
     }, [isConnected, isAuthenticated, sendMessage]);
 
+    // useEffect(() => {
+    //     if (isConnected || users.length > 0) {
+    //         users.forEach((user) => {
+    //             if (user.name) {
+    //                 console.log("MÉ sao kì vậy")
+    //                 if (user.type === 0) {
+    //                     sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
+    //                 } else if (user.type === 1) {
+    //                     sendMessage(SocketRequests.getRoomMessages(user.name, 1));
+    //                 }
+    //             }
+    //         });
+    //     }
+    // }, [users, isConnected, sendMessage]);
 
     const handleSocketMessage = useCallback((e) => {
         const message = e.detail;
@@ -168,48 +156,62 @@ export const useChatList = () => {
                 }
                 break;
 
-            case "GET_PEOPLE_CHAT_MES":
-                const peopleMessages = data;
-                if (Array.isArray(peopleMessages) && peopleMessages.length > 0) {
-                    const sorted = [...peopleMessages].sort((a, b) =>
-                        new Date(b.createAt) - new Date(a.createAt)
-                    );
-                    const lastMsg = sorted[0];
-                    const key = lastMsg.name === currentUser ? lastMsg.to : lastMsg.name;
+                // case "GET_PEOPLE_CHAT_MES":
+                //     const peopleMessages = data;
+                //     if (Array.isArray(peopleMessages) && peopleMessages.length > 0) {
+                //         const sorted = [...peopleMessages].sort((a, b) =>
+                //             new Date(b.createAt) - new Date(a.createAt)
+                //         );
+                //         const lastMsg = sorted[0];
+                //         const key = lastMsg.name === currentUser ? lastMsg.to : lastMsg.name;
 
-                    console.log(`Last message from ${key}: "${lastMsg.mes}"`);
-                    setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-                }
+                //         console.log(`Last message from ${key}: "${lastMsg.mes}"`);
+                //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
+                //     }
 
-                isProcessingQueueRef.current = false;
-                setTimeout(processNextMessage, 100);
+                //     isProcessingQueueRef.current = false;
+                //     setTimeout(processNextMessage, 100);
+                //     break;
+
+                // case "GET_ROOM_CHAT_MES":
+                //     const roomMessages = data?.chatData;
+                //     if (Array.isArray(roomMessages) && roomMessages.length > 0) {
+                //         const sorted = [...roomMessages].sort((a, b) =>
+                //             new Date(b.createAt) - new Date(a.createAt)
+                //         );
+                //         const lastMsg = sorted[0];
+                //         const key = lastMsg.to;
+
+                //         console.log(`Room ${key}: "${lastMsg.mes}"`);
+                //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
+                //     }
+
+                //     isProcessingQueueRef.current = false;
+                //     setTimeout(processNextMessage, 100);
+                //     break;
+
+                // default:
+                //     if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {
+                //         console.log("UNHANDLED EVENT:", event, message);
+                //     }
+                console.log("Danh sach tin nhan lay cua nguoi dung" + message.data)
                 break;
-
             case "GET_ROOM_CHAT_MES":
-                const roomMessages = data?.chatData;
-                if (Array.isArray(roomMessages) && roomMessages.length > 0) {
-                    const sorted = [...roomMessages].sort((a, b) =>
-                        new Date(b.createAt) - new Date(a.createAt)
-                    );
-                    const lastMsg = sorted[0];
-                    const key = lastMsg.to;
+                // if (Array.isArray(message.data) && message.data.length > 0) {
+                //     const sortedMessages = message.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                //     const lastMessage = sortedMessages[0];
 
-                    console.log(`Room ${key}: "${lastMsg.mes}"`);
-                    setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-                }
+                //     const key = lastMessage.name === currentUser ? lastMessage.to : lastMessage.name;
 
-                isProcessingQueueRef.current = false;
-                setTimeout(processNextMessage, 100);
-                break;
-
-            default:
-                if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {
-                    console.log("UNHANDLED EVENT:", event, message);
-                }
+                //     setLastMessages((prev) => ({
+                //         ...prev,
+                //         [key]: lastMessage
+                //     }));
+                // }
                 break;
         }
-        // }, [currentUser, users.length, processNextMessage]);
-    }, [currentUser, users.length, processNextMessage]);
+    }, []);
+
 
     useEffect(() => {
         window.addEventListener("WS_MESSAGE_RECEIVED", handleSocketMessage);

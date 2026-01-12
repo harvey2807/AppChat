@@ -16,9 +16,10 @@ function ConsersationLayout() {
     const [filterType, setFilterType] = useState('all');
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
-    const [selectedChatId, setSelectedChatId] = useState(null)
-    const { isConnected, sendMessage, isAuthenticated, setIsAuthenticated } = useWebSocket();
+    const [selectedChat, setSelectedChat] = useState(null)
+    const { isConnected, sendMessage } = useWebSocket();
     const { isAuth, reloginCode, user } = useAuth();
+    const [listMessages, setListMessages] = useState([])
 
     const handleFilterChange = (type) => {
         setFilterType(type);
@@ -28,64 +29,56 @@ function ConsersationLayout() {
     }, [isAuth]);
 
     useEffect(() => {
-        if (!isConnected && isAuthenticated) {
-            console.log("Socket disconnected, resetting isAuthenticated to false");
-            setIsAuthenticated(false);
-        } else {
-            console.log("Socket connection status:", isConnected, "| isAuthenticated:", isAuthenticated);
+        if (isConnected && isAuth) {
+            sendMessage(SocketRequests.getUserList())
         }
-
-    }, [isConnected, isAuthenticated]);
+    }, [isConnected, isAuth])
 
     useEffect(() => {
-        if ((isConnected || !isConnected) && isAuth && reloginCode && (isAuthenticated || !isAuthenticated)) {
-            console.log("Attempting re-login for user:", user);
-            sendMessage(SocketRequests.reLogin(user, reloginCode));
+        if (!selectedChat) return
+        setListMessages([])
+        if (selectedChat.type === 1) {
+            console.log("Chat da duoc chon: " + selectedChat.name)
+            sendMessage(SocketRequests.getRoomMessages(selectedChat.name, 1))
         } else {
-            console.log("Re-login conditions:", {
-                isConnected,
-                isAuth,
-                hasReloginCode: !!reloginCode,
-                isAuthenticated
-            });
-
+            console.log("Chat da duoc chon: " + selectedChat.name)
+            sendMessage(SocketRequests.getPeopleMessages(selectedChat.name, 1))
         }
-    }, [isConnected, isAuth, reloginCode, isAuthenticated, sendMessage]);
+    }, [selectedChat])
+
 
     useEffect(() => {
-        const handleReLoginSuccess = (e) => {
+        const handler = (e) => {
             const msg = e.detail;
-            console.log("Handle relogin success ", msg.event)
-            setIsAuthenticated(true);
-            try {
-                if (msg.event === "RE_LOGIN" && msg.status === "success") {
-                    console.log("ReLogin successful for user:", msg.event);
-                    //setIsAuthenticated(true);
-                    sendMessage(SocketRequests.getUserList());
-                    // const list = sendMessage(SocketRequests.getUserList());
-                    // console.log("ReLogin successfulllll for user:", msg.event);
-                    // }
-                    //  if (msg.event === "AUTH") {
-                    //     setIsAuthenticated(true);
-                    //     sendMessage(SocketRequests.getUserList());
-                    // }
-                    // Also handle direct LOGIN success (first time login)
-                    // else if (msg.event === "LOGIN" && msg.status === "success") {
 
-                    //     console.log("login sucessfull at the first time");
-                    //     setIsAuthenticated(true);
-                } else {
-                    //why check here 
-                    console.log("ReLogin failed or other event:", msg.event, msg.mes);
-                }
+            if (
+                msg.event === "GET_PEOPLE_CHAT_MES" ||
+                msg.event === "GET_ROOM_CHAT_MES" &&
+                msg.chatName === selectedChat?.name
+            ) {
+
+                const messages = Array.isArray(msg.data) ? msg.data : [];
+                setListMessages(messages);
+                console.log("Bat duoc su kien : " + msg.event)
             }
-            catch (err) {
-                console.log("Error handling re-login success:", err)
+            switch (msg.event) {
+                case "RE_LOGIN":
+                    sendMessage(SocketRequests.getUserList())
+                    break;
+                case "GET_USER_LIST":
+                    setSelectedChat(msg.data[0]);
+                    if (msg.data[0].type === 1) setRoom(true)
+                    else setRoom(false)
+                    break;
+
+                default:
+                    break;
             }
         };
-        window.addEventListener("WS_MESSAGE_RECEIVED", handleReLoginSuccess);
-        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handleReLoginSuccess);
-    }, [isAuthenticated]);
+
+        window.addEventListener("WS_MESSAGE_RECEIVED", handler);
+        return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
+    }, []);
 
     return (
         <div className='chat-container'>
@@ -98,14 +91,14 @@ function ConsersationLayout() {
                         {showChatList && (
                             <div className='chat-left-content'>
                                 <Sidebar onFilterChange={handleFilterChange} />
-                                <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
+                                <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
                             </div>
                         )}
                     </div>
                     {!showChatList && (
                         <div className='chat-right'>
-                            <ChatOtherUser room={room} chatId={selectedChatId} />
-                            <InfoChat room={room} chatId={selectedChatId} />
+                            <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
+                            <InfoChat room={room} chat={selectedChat} />
                         </div>
                     )}
                 </>
@@ -116,14 +109,14 @@ function ConsersationLayout() {
                         <button className="chat-icon" onClick={() => setShowChatList(true)} />
                         <div className='chat-left-content'>
                             <Sidebar onFilterChange={handleFilterChange} />
-                            <ListMess onSelectChat={setSelectedChatId} filter={filterType} />
+                            <ListMess onSelectChat={setSelectedChat} filter={filterType} setRoom={setRoom} />
                         </div>
 
                     </div>
 
                     <div className='chat-right'>
-                        <ChatOtherUser room={room} chatId={selectedChatId} />
-                        <InfoChat room={room} chatId={selectedChatId} />
+                        <ChatOtherUser room={room} chat={selectedChat} mess={listMessages} />
+                        <InfoChat room={room} chat={selectedChat} />
                     </div>
                 </>
             )}

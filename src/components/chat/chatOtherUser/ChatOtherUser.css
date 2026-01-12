@@ -5,6 +5,7 @@
     background-color: var(--bg);
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
 .chat-box-header {
@@ -45,7 +46,7 @@
 
 .main-chat {
     width: 100%;
-    height: 80%;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
     display: flex;
@@ -117,6 +118,26 @@
 .time-send:hover {
     opacity: 0 !important;
     transform: none !important;
+}
+.image-preview{
+    position: absolute;
+    bottom: 60px;
+    left: 10px;
+}
+.remove-image{
+    width: 25px;
+    height: 25px;
+    font-size: 13px;
+    border: none;
+    margin: 0;
+    padding: 0;
+    border-radius: 15px;
+    background-color: white;
+    color: black;
+    position: absolute;
+    font-weight: 800;
+    top: 5px;
+    right: 5px;
 }
 
 .chat-input {
