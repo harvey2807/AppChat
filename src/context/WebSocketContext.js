@@ -39,11 +39,11 @@ export function WebSocketProvider({ children }) {
             const message = JSON.parse(event.data);
             
             // Log ALL messages to see what's coming back
-            console.log("Received:", message.event, message.status);
+            // console.log("Received:", message.event, message.status);
             
             // Log people message responses specifically
             if (message.event === "GET_PEOPLE_CHAT_MES") {
-                console.log("GET_PEOPLE_CHAT_MES received:", JSON.stringify(message, null, 2));
+                // console.log("GET_PEOPLE_CHAT_MES received:", JSON.stringify(message, null, 2));
             }
             
             window.dispatchEvent(

@@ -103,7 +103,7 @@ export const useChatList = () => {
         console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
 
         if (user.type === 0) {
-            console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
+            // console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
             sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
         } else if (user.type === 1) {
             sendMessage(SocketRequests.getRoomMessages(user.name, 1));
@@ -194,7 +194,7 @@ export const useChatList = () => {
                 //     if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {
                 //         console.log("UNHANDLED EVENT:", event, message);
                 //     }
-                console.log("Danh sach tin nhan lay cua nguoi dung" + message.data)
+                // console.log("Danh sach tin nhan lay cua nguoi dung" + message.data)
                 break;
             case "GET_ROOM_CHAT_MES":
                 // if (Array.isArray(message.data) && message.data.length > 0) {

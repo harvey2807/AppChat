@@ -18,7 +18,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
 
-    const { sendMessage , isConnected} = useWebSocket();
+    const { sendMessage, isConnected } = useWebSocket();
     const srcUser = useAuth().user?.username || "";
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
@@ -59,11 +59,29 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
     async function uploadImageToCloudinary(file) {
         const formData = new FormData()
+        // if (!file.type.startsWith("image/")) {
+        //     //if the file is not image, we will convert base64
+        //     //You could also try to hardcode a Base64 String for an image as the value of the `file` parameter
+        //     //  and send an upload request with it to test/ensure the rest of the upload works
+        //     const base64 = await new Promise((resolve, reject) => {
+        //         const reader = new FileReader();
+        //         reader.readAsDataURL(file);
+        //         reader.onload = () => resolve(reader.result);
+        //         reader.onerror = error => reject(error);
+        //     });
+        //     const blob = await (await fetch(base64)).blob();
+        //     console.log("Blob file:", blob);
+        //     formData.append("file", blob, file.name);
+
+        // }
+        const isImage = file.type.startsWith("image/");
+        const resourceType = isImage ? "image" : "raw";
         formData.append("file", file)
         formData.append("upload_preset", "chat_unsigned")
+        console.log("Uploading image to Cloudinary...", file)
 
         const response = await fetch(
-            "https://api.cloudinary.com/v1_1/appchatnlu/image/upload",
+            `https://api.cloudinary.com/v1_1/appchatnlu/${resourceType}/upload`,
             {
                 method: "POST",
                 body: formData
@@ -71,13 +89,16 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
         )
 
         if (!response.ok) {
-            throw new Error("Upload failed")
+            const errData = await response.json();
+            console.error("Cloudinary error:", errData);
+            throw new Error(errData.error?.message || "Upload failed");
         }
 
         const data = await response.json()
-
+        console.log("Form data", formData)
         return data.secure_url
     }
+
 
     const handleInput = () => {
         const el = textareaRef.current
@@ -138,7 +159,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
                 sendMessage(SocketRequests.sendToRoom(chat.name, imageUrl));
                 sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
 
-            } else if(!room){
+            } else if (!room) {
                 sendMessage(SocketRequests.sendToPeople(chat.name, imageUrl));
                 sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
             }
@@ -162,7 +183,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
             console.log("Sending packet:", packet);
             sendMessage(packet);
             sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
-        } else if(!room) {
+        } else if (!room) {
             const packet = SocketRequests.sendToPeople(chat.name, msgText);
             console.log("Sending packet:", packet);
             sendMessage(packet);
@@ -211,12 +232,17 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
                 {selectedFile && (
                     <>
-                        <ImagePreview file={selectedFile} className="image-preview" />
+                        {selectedFile.type.startsWith("image/") ? (
+                            <ImagePreview file={selectedFile} className="image-preview" />
+                        ) : (
+                            <FilePreview file={selectedFile} className="file-preview" />
+                        )}
                     </>
                 )}
                 <div className="chat-input">
                     <ImagePicker onSelect={setSelectedFile} />
-                    <button className='file-btn' />
+                    <FilePicker onSelect={setSelectedFile} />
+                    {/* <button className='file-btn' /> */}
                     <div className="form-chat">
                         <textarea className="chat-text"
                             ref={textareaRef}
@@ -362,6 +388,61 @@ function ImagePreview({ file }) {
     )
 }
 
+function FilePicker({ onSelect }) {
+    const inputImageRef = useRef(null)
 
+    const openFileDialog = () => {
+        inputImageRef.current.click()
+    }
 
+    const handleChange = (e) => {
+        const file = e.target.files[0]
+        if (file) {
+            onSelect(file)
+        }
+    }
+
+    return (
+        <>
+
+            <button onClick={openFileDialog}
+                className='file-btn' />
+
+            <input
+                ref={inputImageRef}
+                type="file"
+                accept="file/*"
+                hidden
+                onChange={handleChange}
+            />
+        </>
+    )
+}
+
+function FilePreview({ file }) {
+    const [preview, setPreview] = useState(null)
+
+    useEffect(() => {
+        if (!file) return
+
+        const url = URL.createObjectURL(file)
+        setPreview(url)
+
+        return () => URL.revokeObjectURL(url)
+    }, [file])
+
+    if (!preview) return null
+
+    return (
+        <div className='file-preview'>
+            <button className='remove-file'>x</button>
+            <img
+                src={preview}
+                alt="preview"
+                style={{ maxWidth: 200, borderRadius: 8 }}
+            />
+        </div>
+    )
+
+}
 export default ChatOtherUser
