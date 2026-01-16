@@ -29,7 +29,7 @@ function ListMess({ onSelectChat, filter, setRoom, setShowChatList }) {
                         key={index}
                         user={user}
                         isOnline={onlineStatus[user.name]}
-                        lastMessage={lastMessages[user.name]}
+                        // lastMessage={lastMessages[user.name]}
                         onClick={() => {
                             onSelectChat(user);
                             setShowChatList(false);
