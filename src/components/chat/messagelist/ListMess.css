@@ -1,0 +1,96 @@
+.chat-list {
+    margin-top: 20px;
+    width: 95%;
+    height: 60%;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    padding: 0 16px;
+    background-color: var(--bg);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 200ms ease, transform 200ms ease;
+    overflow-y: auto;
+    margin: 0 10px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.list-group {
+    background-color: var(--bg);
+}
+
+.list-group-item-action {
+    color: var(--text);
+}
+
+.chat-list .list-group-item {
+    background-color: var(--bg);
+    border-radius: 10px;
+    border: none;
+    padding: 10px 5px 10px 10px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    background-position: center;
+    background-size: cover;
+    background-image: url("../../../assets/images/icon-person.png");
+    border: solid 2px gray;
+}
+
+.status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    background-color: #0cff5d;
+}
+
+@media(max-width: 1200px) {
+    .avatar {
+        height: 30px;
+    }
+}
+
+.status-dot.online {
+    background-color: #0cff5d;
+}
+
+/* Offline */
+.status-dot.offline {
+    background-color: #adb5bd;
+}
+
+@media(max-width: 992px) {
+    .chat-list {
+        width: 95%;
+        display: flex;
+    }
+
+    .list-group {
+        width: 100%;
+    }
+
+    h6 {
+        font-size: 12px;
+    }
+
+    .list-group-item {
+        height: 40px;
+        display: flex;
+        font-size: 10px;
+        padding: 3px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .avatar {
+        width: 30px;
+        height: 30px;
+    }
+
+}
