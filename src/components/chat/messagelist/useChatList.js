@@ -65,10 +65,10 @@ export const useChatList = () => {
             users.forEach((user) => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
-
+                    // console.log("Đang kiểm tra trạng thái online của user:", user.name);
                     const recentUsers = [...users]
                         .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                        .slice(0, 13);
+                        
                     messageQueueRef.current = recentUsers;
                 }
             });
@@ -134,12 +134,14 @@ export const useChatList = () => {
         switch (event) {
             case "GET_USER_LIST":
                 if (Array.isArray(data)) {
+                    // console.log("Received user list:", data);
                     setUsers(data);
                 }
                 break;
 
             case "CHECK_USER_ONLINE":
                 const userChecked = checkQueueRef.current.shift();
+                console.log("Checked online status for user:", userChecked);
                 if (userChecked) {
                     onlineCheckCountRef.current++;
                     console.log(`[${onlineCheckCountRef.current}/${users.length}] ${userChecked}: ${data.status ? 'online' : 'offline'}`);

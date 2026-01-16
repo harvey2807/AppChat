@@ -11,7 +11,7 @@ import { useWebSocket } from "../../../context/WebSocketContext";
 import { SocketRequests } from "../../../hooks/useWebSocket";
 
 const userName = localStorage.getItem("USER")
-
+let nameFile = "";
 function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
@@ -59,25 +59,16 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
     async function uploadImageToCloudinary(file) {
         const formData = new FormData()
-        // if (!file.type.startsWith("image/")) {
-        //     //if the file is not image, we will convert base64
-        //     //You could also try to hardcode a Base64 String for an image as the value of the `file` parameter
-        //     //  and send an upload request with it to test/ensure the rest of the upload works
-        //     const base64 = await new Promise((resolve, reject) => {
-        //         const reader = new FileReader();
-        //         reader.readAsDataURL(file);
-        //         reader.onload = () => resolve(reader.result);
-        //         reader.onerror = error => reject(error);
-        //     });
-        //     const blob = await (await fetch(base64)).blob();
-        //     console.log("Blob file:", blob);
-        //     formData.append("file", blob, file.name);
-
-        // }
         const isImage = file.type.startsWith("image/");
         const resourceType = isImage ? "image" : "raw";
+
         formData.append("file", file)
+        nameFile = file.name;
+        // formData.append("use_filename", "true")
+        // formData.append("unique_filename", "true")
+        // formData.append("overwrite", "false")
         formData.append("upload_preset", "chat_unsigned")
+
         console.log("Uploading image to Cloudinary...", file)
 
         const response = await fetch(
@@ -132,7 +123,8 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
             setUploading(true)
 
             const imageUrl = await uploadImageToCloudinary(selectedFile)
-
+            // nameFile = getCloudinaryFileName(imageUrl)
+            console.log("Uploaded image URL:", nameFile)
             setSelectedFile(null)
             return imageUrl
         } catch (err) {
@@ -285,17 +277,47 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 const isCloudinaryImage = (text) =>
     text.startsWith("https://res.cloudinary.com/")
 
+function getCloudinaryFileType(url){
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg'];
+    const ext = url.split('.').pop().toLowerCase();
+    // if(imageExts.some(r => url.endsWith(r))) return "image";
+    return imageExts.includes(ext)? "image" : "raw"; //true if image, false if raw
+}
+
+function getCloudinaryFileName(url) {
+    const parts = url.split('/');
+    return parts[parts.length - 1].split('.')[0]; // returns file name without extension
+}
+
 function Message(msg, room) {
     if (msg.name === userName) {
         return (
             <div key={msg.id} className="message me">
                 <div className="message-content">
-                    {isCloudinaryImage(msg.mes) ? (
+                    {/* {isCloudinaryImage(msg.mes) ? (
                         <img
+                            //at here we need to check if msg.mes is image or file
+                            //and render accordingly
                             src={msg.mes}
                             alt="chat-img"
                             style={{ maxWidth: 240, borderRadius: 8 }}
                         />
+                    ) : (
+                        <p>{msg.mes}</p>
+                    )} */}
+
+                    {isCloudinaryImage(msg.mes) ? (
+                        getCloudinaryFileType(msg.mes) === "image" ? (
+                            <img
+                                src={msg.mes}
+                                alt="chat-img"
+                                style={{ maxWidth: 240, borderRadius: 8 }}
+                            />
+                        ) : (
+                            <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                Download File
+                            </a>
+                        )
                     ) : (
                         <p>{msg.mes}</p>
                     )}
@@ -314,11 +336,17 @@ function Message(msg, room) {
                     {room && (<p className='sender-mess'>Duy đã gửi tin nhắn</p>)}
                     <div className="message-content">
                         {isCloudinaryImage(msg.mes) ? (
-                            <img
-                                src={msg.mes}
-                                alt="chat-img"
-                                style={{ maxWidth: 240, borderRadius: 8 }}
-                            />
+                            getCloudinaryFileType(msg.mes) === "image" ? (
+                                <img
+                                    src={msg.mes}
+                                    alt="chat-img"
+                                    style={{ maxWidth: 240, borderRadius: 8 }}
+                                />
+                            ) : (//how to display UI for file message
+                                    <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                        {getCloudinaryFileName(msg.mes) || "Download File"}
+                                    </a>
+                            )
                         ) : (
                             <p>{msg.mes}</p>
                         )}
