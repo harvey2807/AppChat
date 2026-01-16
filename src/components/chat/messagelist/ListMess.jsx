@@ -7,10 +7,10 @@ import { SocketRequests } from '../../../hooks/useWebSocket';
 
 function ListMess({ onSelectChat, filter, setRoom, setShowChatList }) {
     const { users, onlineStatus, lastMessages } = useChatList();
-    // 
     // 2. Logic lọc danh sách dựa trên filter
     const filteredUsers = users.filter((user) => {
         if (filter === 'all') {
+
             return true; // Lấy hết
 
         }
@@ -22,7 +22,7 @@ function ListMess({ onSelectChat, filter, setRoom, setShowChatList }) {
     });
 
     return (
-        <div className="chat-list">
+        <div className="chat-list"> 
             <div className="list-group list-group-flush">
                 {filteredUsers.map((user, index) => (
                     <ConversationItem

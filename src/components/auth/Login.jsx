@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Login.css';
 import { useWebSocket } from '../../context/WebSocketContext';
 import { SocketRequests } from '../../hooks/useWebSocket';
@@ -7,19 +7,20 @@ import { useIsRTL } from 'react-bootstrap/esm/ThemeProvider';
 
 function Login() {
     const [username, setUsername] = React.useState('');
+    const usernameRef = useRef('');
     const [password, setPassword] = React.useState('');
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState('');
-    const { sendMessage, isConnected, connect } = useWebSocket();
+    const { sendMessage, isConnected, connect, setIsAuthenticated } = useWebSocket();
     const { loginSuccess } = useAuth();
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
-        sendMessage(SocketRequests.login(username, password));
-        localStorage.setItem("USERNAME", username)
-        localStorage.setItem("PASSWORD", password)
+        usernameRef.current = username;
+        sendMessage(SocketRequests.login(usernameRef.current, password));
+        // sendMessage(SocketRequests.login(username, password));
+        localStorage.setItem("USER", username)
     };
 
     useEffect(() => {
@@ -31,10 +32,10 @@ function Login() {
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
-            const username = localStorage.getItem("USERNAME")
-            console.log(username)
-            console.log(msg)
+            const username = localStorage.getItem("USER")
             if (msg.event === "LOGIN" && msg.status === "success") {
+                setIsAuthenticated(true);
+                console.log("Login successful for usersrrrrr:", msg.event);
                 loginSuccess(username, msg.data.RE_LOGIN_CODE);
             }
 
@@ -47,7 +48,7 @@ function Login() {
 
         window.addEventListener("WS_MESSAGE_RECEIVED", handler);
         return () => window.removeEventListener("WS_MESSAGE_RECEIVED", handler);
-    }, [loginSuccess]);
+    }, [loginSuccess, setIsAuthenticated]);
 
     return (
         <div className="login-page">

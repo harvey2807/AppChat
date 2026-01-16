@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useRef } from "react";
 
 const AuthContext = createContext();
 
@@ -17,24 +17,27 @@ export const AuthProvider = ({ children }) => {
       setUser(storedUser);
       setReloginCode(storedCode);
       setIsAuth(true);
+      console.log("Restored session from localStorage:");
     }
   }, []);
 
   const loginSuccess = (user, code) => {
+    setIsAuth(true)
     setUser(user);
-    setIsAuth(true);
     setReloginCode(code);
-
-    localStorage.setItem("USER",user);
+    console.log("Login success, storing user and code in localStorage:", user, code);
+    localStorage.setItem("USER", user);
     localStorage.setItem("RE_LOGIN_CODE", code);
   };
 
   const logout = () => {
     setUser(null);
-    setIsAuth(false);
     setReloginCode(null);
+    //why clear local storage here
+    setIsAuth(false);
     localStorage.clear();
   };
+
 
   const chatWithUser = (username) => {
     setDstUser(username);

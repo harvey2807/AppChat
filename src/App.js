@@ -7,6 +7,7 @@ import Register from './components/auth/Register.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 import PrivateRoute from './context/PrivateRouter.jsx';
 
+
 function App() {
   const { isAuth } = useAuth();
 
@@ -14,14 +15,11 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
-
         <Route
           path="/login"
           element={isAuth ? <Navigate to="/app" replace /> : <Login />}
         />
-
         <Route path="/register" element={<Register />} />
-
         <Route
           path="/app"
           element={

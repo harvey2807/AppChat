@@ -18,8 +18,10 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
 
+
     const { sendMessage, isConnected } = useWebSocket();
     const { user } = useAuth();
+    const srcUser = useAuth().user?.username || "";
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
     const [isFile, setIsFile] = useState(false);
@@ -50,20 +52,21 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
     };
 
-    useEffect(() => {
-        if (!chat) return;
-        // if(!isActive(chat.name, chat.type)) return;
-        // console.log("Chat đang active : " + isActive(chat.name, chat.type))
-        const interval = setInterval(() => {
-            if (chat.type === 1) {
-                sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
-            } else {
-                sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
-            }
-        }, 1000); // 2 giây
+    // useEffect(() => {
+    //     if (!chat) return;
+    //     // if(!isActive(chat.name, chat.type)) return;
+    //     // console.log("Chat đang active : " + isActive(chat.name, chat.type))
 
-        return () => clearInterval(interval);
-    }, [chat]);
+    //     const interval = setInterval(() => {
+    //         if (chat.type === 1) {
+    //             sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
+    //         } else {
+    //             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
+    //         }
+    //     }, 1000); // 2 giây
+
+    //     return () => clearInterval(interval);
+    // }, [chat]);
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
@@ -97,6 +100,13 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         });
     }, [chat?.id]);
 
+    useLayoutEffect(() => {
+        if (!bottomRef.current) return;
+
+        if (!isAtBottomRef.current) return; // 👈 QUAN TRỌNG
+
+        bottomRef.current.scrollIntoView({ behavior: "auto" });
+    }, [mess, chat, isConnected]);
 
     async function uploadImageToCloudinary(file) {
         const formData = new FormData()
@@ -141,7 +151,6 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             textareaRef.current.value = "";
             textareaRef.current.style.height = "40px";
             setUploading(false)
-
         }
     };
     const { theme, toggleTheme } = useContext(ThemeContext)
@@ -166,6 +175,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     const sendNude = async () => {
         setUploading(true)
 
+        console.log("Send message:", text);
         // FOR TESTING PURPOSES ONLY
         // dstUser = "tttt" // REMOVE THIS LINE IN PRODUCTION
         // dstRoom = "room1" // REMOVE THIS LINE IN PRODUCTION
@@ -202,6 +212,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         console.log("Message packaging...");
         // check whether send message to room or people
         console.log(`Room :${room}, In Room: ${isInRoom}, Chat type: ${chat.type}`)
+
         if (room && isInRoom) {
             const packet = SocketRequests.sendToRoom(chat.name, encodeEmoji(msgText));
             console.log("Sending packet:", packet);
@@ -218,20 +229,6 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         setUploading(false)
         return;
     }
-
-    // const handleSendMessage = (chatName, type, msg) => {
-    //     const chatType = type === 1 ? 'room' : 'people';
-    //     console.log("Chat type là " + chatType)
-    //     //  append local message
-    //     setListMessages(prev => [{
-    //         id: `local-${Date.now()}`,
-    //         name: user,
-    //         type: chatType,
-    //         to: chatName,
-    //         mes: msg,
-    //         createAt: new Date().toISOString()
-    //     }, ...prev]);
-    // };
 
     return (
         <>
@@ -262,7 +259,9 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
                     })}
                     {/* Mốc để scroll */}
                     <div ref={bottomRef} />
+                    
                     {room && !isInRoom && (
+
                         <div className='error-box slide-up'>
                             <span className='error-noti'> {error}</span>
                         </div>
@@ -397,7 +396,6 @@ function ImagePicker({ onSelect }) {
 
     return (
         <>
-
             <button onClick={openFileDialog}
                 className='image-btn' />
 
