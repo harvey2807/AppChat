@@ -17,14 +17,15 @@ function ConsersationLayout() {
     const isMobile = useMediaQuery("(max-width: 992px)")
     const [showChatList, setShowChatList] = useState(false)
     const [selectedChat, setSelectedChat] = useState(null)
-    const { isConnected, sendMessage, connect } = useWebSocket();
-    const { isAuth, user } = useAuth();
+    const { sendMessage, disconnect } = useWebSocket();
+    const { isAuth, user, logout } = useAuth();
     const [listMessages, setListMessages] = useState([])
     const [isInRoom, setIsInRoom] = useState(false);
     const [listMemberInRoom, setListMemberInRoom] = useState([])
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
     const selectedChatRef = useRef(null);
+    const [reloginError, setReloginError] = useState(false)
 
 
     const handleFilterChange = (type) => {
@@ -91,14 +92,34 @@ function ConsersationLayout() {
             switch (msg.event) {
                 case "RE_LOGIN":
                     console.log("Đã gọi relogin với status: " + msg.status + " Và nội dung là : " + msg.data)
-                    localStorage.setItem("RE_LOGIN_CODE", msg.data.RE_LOGIN_CODE)
-                    sendMessage(SocketRequests.getUserList())
+                    if (msg.status === 'error') {
+                        setReloginError(true)
+                    } else {
+                        setReloginError(false)
+                        localStorage.setItem("RE_LOGIN_CODE", msg.data.RE_LOGIN_CODE)
+                        sendMessage(SocketRequests.getUserList())
+                    }
                     break;
                 case "GET_USER_LIST":
                     // CHỈ set lần đầu khi chưa có chat nào được chọn
                     if (!selectedChatRef.current && msg.data.length > 0) {
-                        setSelectedChat(msg.data[0]);
-                        setRoom(msg.data[0].type === 1);
+                        const listUser = msg.data.filter(x => x.name !== user)
+
+                        setSelectedChat(listUser[0]);
+                        setRoom(listUser[0].type === 1);
+                    }
+                    break;
+                case "SEND_CHAT":
+                    if (!selectedChat) return;
+                    console.log(selectedChat)
+                    if (msg.status === "success") {
+                        if (msg.data.name === selectedChat.name) {
+                            if (msg.data.type === 0) {
+                                sendMessage(SocketRequests.getPeopleMessages(msg.data.name, 1))
+                            } else {
+                                sendMessage(SocketRequests.getRoomMessages(msg.data.name, 1))
+                            }
+                        }
                     }
                     break;
                 case "GET_PEOPLE_CHAT_MES":
@@ -109,10 +130,18 @@ function ConsersationLayout() {
                     }
                     setListMessages(prev => {
                         const map = new Map();
-                        messOfPeople.forEach(m => map.set(m.id, m));
-                        prev.forEach(m => map.set(m.id, m));
-                        return Array.from(map.values());
+
+                        // 1. merge + dedupe
+                        [...prev, ...messOfPeople].forEach(m => {
+                            map.set(m.id, m);
+                        });
+
+                        // 2. sort theo thời gian
+                        return Array.from(map.values()).sort(
+                            (a, b) => new Date(b.createAt) - new Date(a.createAt)
+                        );
                     });
+
                     break;
                 case "GET_ROOM_CHAT_MES":
                     const messOfRoom = msg.data.chatData.length ? msg.data.chatData : [];
@@ -128,9 +157,16 @@ function ConsersationLayout() {
 
                     setListMessages(prev => {
                         const map = new Map();
-                        messOfRoom.forEach(m => map.set(m.id, m));
-                        prev.forEach(m => map.set(m.id, m));
-                        return Array.from(map.values());
+
+                        // 1. merge + dedupe
+                        [...prev, ...messOfRoom].forEach(m => {
+                            map.set(m.id, m);
+                        });
+
+                        // 2. sort theo thời gian
+                        return Array.from(map.values()).sort(
+                            (a, b) => new Date(b.createAt) - new Date(a.createAt)
+                        );
                     });
                     break;
                 default:
@@ -145,12 +181,19 @@ function ConsersationLayout() {
     return (
         <>
             <div className='chat-container'>
-                {/* <div className="end-session">
-                    <div className="box">
-                        <p>Đã hết phiên, vui lòng đăng nhập lại</p>
-                        <button className='btn-ok'>OK</button>
+                {reloginError && (
+                    <div className="end-session">
+                        <div className="box">
+                            <p>Đã hết phiên, vui lòng đăng nhập lại</p>
+                            <button className='btn-ok'
+                                onClick={() => {
+                                    logout();
+                                    disconnect();
+                                }}
+                            >OK</button>
+                        </div>
                     </div>
-                </div> */}
+                )}
                 {isMobile && (
                     <>
                         <div className='chat-left' style={{ width: showChatList ? '100%' : '5%' }}>

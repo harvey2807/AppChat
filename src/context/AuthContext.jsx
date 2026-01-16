@@ -22,6 +22,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginSuccess = (user, code) => {
+    setIsAuth(true)
     setUser(user);
     setReloginCode(code);
     console.log("Login success, storing user and code in localStorage:", user, code);

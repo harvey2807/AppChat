@@ -52,21 +52,21 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
     };
 
-    useEffect(() => {
-        if (!chat) return;
-        // if(!isActive(chat.name, chat.type)) return;
-        // console.log("Chat đang active : " + isActive(chat.name, chat.type))
+    // useEffect(() => {
+    //     if (!chat) return;
+    //     // if(!isActive(chat.name, chat.type)) return;
+    //     // console.log("Chat đang active : " + isActive(chat.name, chat.type))
 
-        const interval = setInterval(() => {
-            if (chat.type === 1) {
-                sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
-            } else {
-                sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
-            }
-        }, 1000); // 2 giây
+    //     const interval = setInterval(() => {
+    //         if (chat.type === 1) {
+    //             sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
+    //         } else {
+    //             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
+    //         }
+    //     }, 1000); // 2 giây
 
-        return () => clearInterval(interval);
-    }, [chat]);
+    //     return () => clearInterval(interval);
+    // }, [chat]);
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
@@ -396,7 +396,6 @@ function ImagePicker({ onSelect }) {
 
     return (
         <>
-
             <button onClick={openFileDialog}
                 className='image-btn' />
 
