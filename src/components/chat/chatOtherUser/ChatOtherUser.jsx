@@ -11,14 +11,18 @@ import { useWebSocket } from "../../../context/WebSocketContext";
 import { SocketRequests } from "../../../hooks/useWebSocket";
 
 const userName = localStorage.getItem("USER")
-let nameFile = "";
-function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
+
+
+function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
 
+
+
     const { sendMessage, isConnected } = useWebSocket();
+    const { user } = useAuth();
     const srcUser = useAuth().user?.username || "";
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
@@ -27,27 +31,76 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const bottomRef = useRef(null);
     const chatContainerRef = useRef(null);
     const isAtBottomRef = useRef(true);
+    const [error, setError] = useState("Hãy tham gia phòng để gửi tin nhắn!");
+
+    const prevScrollHeightRef = useRef(0);
 
     const handleScroll = () => {
         const el = chatContainerRef.current;
+        if (!el || !hasMore) return;
+
+        const thresholdTop = 20;
+        const thresholdBottom = 50;
+
+        // 👇 CHỈ ghi scrollHeight khi sắp load thêm
+        if (el.scrollTop <= thresholdTop) {
+            prevScrollHeightRef.current = el.scrollHeight;
+            onLoadMore(); // gọi CHA
+            return; // ⛔ QUAN TRỌNG: dừng luôn
+        }
+
+        // 👇 chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
+        isAtBottomRef.current =
+            el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
+    };
+
+    // useEffect(() => {
+    //     if (!chat) return;
+    //     // if(!isActive(chat.name, chat.type)) return;
+    //     // console.log("Chat đang active : " + isActive(chat.name, chat.type))
+
+    //     const interval = setInterval(() => {
+    //         if (chat.type === 1) {
+    //             sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
+    //         } else {
+    //             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
+    //         }
+    //     }, 1000); // 2 giây
+
+    //     return () => clearInterval(interval);
+    // }, [chat]);
+
+    useLayoutEffect(() => {
+        if (!bottomRef.current) return;
+        if (!isAtBottomRef.current) return;
+
+    }, [mess]);
+    useLayoutEffect(() => {
+        const el = chatContainerRef.current;
         if (!el) return;
 
-        const threshold = 50; // px
-        isAtBottomRef.current =
-            el.scrollHeight - el.scrollTop - el.clientHeight < threshold;
-    };
-    useEffect(() => {
-        if (!chat) return;
-        const interval = setInterval(() => {
-            if (chat.type === 1) {
-                sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
-            } else {
-                sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
-            }
-        }, 1000); // 2 giây
+        // 1️⃣ Load thêm tin cũ → giữ vị trí
+        if (prevScrollHeightRef.current > 0) {
+            el.scrollTop =
+                el.scrollHeight - prevScrollHeightRef.current;
+            prevScrollHeightRef.current = 0;
+            return;
+        }
 
-        return () => clearInterval(interval);
-    }, [chat]);
+        // 2️⃣ User đang ở đáy → auto scroll
+        if (isAtBottomRef.current) {
+            el.scrollTop = el.scrollHeight;
+        }
+    }, [mess.length, chat, isConnected]);
+    useEffect(() => {
+        isAtBottomRef.current = true;
+        prevScrollHeightRef.current = 0;
+
+        requestAnimationFrame(() => {
+            const el = chatContainerRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        });
+    }, [chat?.id]);
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
@@ -106,8 +159,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            // const message = textareaRef.current.value;
-            // sendMessage(SocketRequests.sendToRoom(chatId, message))
+
             setUploading(true)
             sendNude();
             textareaRef.current.value = "";
@@ -134,6 +186,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
         }
     }
 
+
     const sendNude = async () => {
         setUploading(true)
 
@@ -149,10 +202,13 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
             // check whether send message to room or people
             if (room && isInRoom) {
                 sendMessage(SocketRequests.sendToRoom(chat.name, imageUrl));
+                //append ngay cho UI
+                // handleSendMessage(chat.name, chat.type, imageUrl)
                 sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
 
             } else if (!room) {
                 sendMessage(SocketRequests.sendToPeople(chat.name, imageUrl));
+                // handleSendMessage(chat.name, chat.type, imageUrl)
                 sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
             }
         }
@@ -166,18 +222,23 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
         // reset input
         setText("");
 
+        console.log("Send message:", msgText);
         // send msg
         console.log("Message packaging...");
         // check whether send message to room or people
         console.log(`Room :${room}, In Room: ${isInRoom}, Chat type: ${chat.type}`)
-        if (room && isInRoom && chat.type === 1) {
-            const packet = SocketRequests.sendToRoom(chat.name, msgText);
+
+        if (room && isInRoom) {
+            const packet = SocketRequests.sendToRoom(chat.name, encodeEmoji(msgText));
             console.log("Sending packet:", packet);
+            // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
             sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
         } else if (!room) {
-            const packet = SocketRequests.sendToPeople(chat.name, msgText);
+
+            const packet = SocketRequests.sendToPeople(chat.name, encodeEmoji(msgText));
             console.log("Sending packet:", packet);
+            // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
         }
@@ -215,7 +276,9 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
                     })}
                     {/* Mốc để scroll */}
                     <div ref={bottomRef} />
-                    {room && !isInRoom && error !== '' && (
+
+                    {room && !isInRoom && (
+
                         <div className='error-box slide-up'>
                             <span className='error-noti'> {error}</span>
                         </div>
@@ -225,64 +288,82 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
 
                 {selectedFile && (
                     <>
-                        {selectedFile.type.startsWith("image/") ? (
-                            <ImagePreview file={selectedFile} className="image-preview" />
-                        ) : (
-                            <FilePreview file={selectedFile} className="file-preview" />
-                        )}
+    {
+        selectedFile.type.startsWith("image/") ? (
+            <ImagePreview file={selectedFile} className="image-preview" />
+        ) : (
+        <FilePreview file={selectedFile} className="file-preview" />
+    )
+    }
+
                     </>
-                )}
-                <div className="chat-input">
-                    <ImagePicker onSelect={setSelectedFile} />
-                    <FilePicker onSelect={setSelectedFile} />
-                    {/* <button className='file-btn' /> */}
-                    <div className="form-chat">
-                        <textarea className="chat-text"
-                            ref={textareaRef}
-                            rows="1"
-                            value={text}
-                            onChange={e => setText(e.target.value)}
-                            onInput={handleInput}
-                            onKeyDown={handleKeyDown}
-                            onClick={() => setShowPicker(false)}
-                            placeholder='Nhập tin nhắn . . .' />
-                        <button className="icon-btn file-btn"
-                            onClick={() => setShowPicker(prev => !prev)}
-                        />
-                        {uploading ? (
-                            <div className="send-status">
-                                <span className="dot dot-1"></span>
-                                <span className="dot dot-2"></span>
-                                <span className="dot dot-3"></span>
-                            </div>
-                        ) : (
-                            <button className="send-btn file-btn" onClick={sendNude}></button>
-                        )}
-                    </div>
-                    {showPicker && (
-                        <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
-                            <EmojiPicker
-                                data={data}
-                                onEmojiSelect={(emoji) =>
-                                    setText(prev => prev + emoji.native)
-                                }
-                            />
-                        </div>
-                    )}
-                </div>
+                )
+}
+<div className="chat-input">
+    <ImagePicker onSelect={setSelectedFile} />
+    <FilePicker onSelect={setSelectedFile} />
+    {/* <button className='file-btn' /> */}
+    <div className="form-chat">
+        <textarea className="chat-text"
+            ref={textareaRef}
+            rows="1"
+            value={text}
+            onChange={e => setText(e.target.value)}
+            onInput={handleInput}
+            onKeyDown={handleKeyDown}
+            onClick={() => setShowPicker(false)}
+            placeholder='Nhập tin nhắn . . .' />
+        <button className="icon-btn file-btn"
+            onClick={() => setShowPicker(prev => !prev)}
+        />
+        {uploading ? (
+            <div className="send-status">
+                <span className="dot dot-1"></span>
+                <span className="dot dot-2"></span>
+                <span className="dot dot-3"></span>
             </div>
+        ) : (
+            <button className="send-btn file-btn" onClick={sendNude}></button>
+        )}
+    </div>
+    {showPicker && (
+        <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
+            <EmojiPicker
+                data={data}
+                onEmojiSelect={(emoji) =>
+                    setText(prev => prev + emoji.native)
+                }
+            />
+        </div>
+    )}
+</div>
+            </div >
         </>
     )
 }
+const encodeEmoji = (text) => {
+    const bytes = new TextEncoder().encode(text);
+    return btoa(String.fromCharCode(...bytes));
+};
+
+const decodeEmoji = (text) => {
+    try {
+        const bytes = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+        return new TextDecoder().decode(bytes);
+    } catch {
+        return text;
+    }
+};
+
 
 const isCloudinaryImage = (text) =>
     text.startsWith("https://res.cloudinary.com/")
 
-function getCloudinaryFileType(url){
+function getCloudinaryFileType(url) {
     const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg'];
     const ext = url.split('.').pop().toLowerCase();
     // if(imageExts.some(r => url.endsWith(r))) return "image";
-    return imageExts.includes(ext)? "image" : "raw"; //true if image, false if raw
+    return imageExts.includes(ext) ? "image" : "raw"; //true if image, false if raw
 }
 
 function getCloudinaryFileName(url) {
@@ -304,6 +385,7 @@ function Message(msg, room) {
                             style={{ maxWidth: 240, borderRadius: 8 }}
                         />
                     ) : (
+                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
                         <p>{msg.mes}</p>
                     )} */}
 
@@ -320,7 +402,7 @@ function Message(msg, room) {
                             </a>
                         )
                     ) : (
-                        <p>{msg.mes}</p>
+                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
                     )}
                     <span className="time-send">
                         {msg.createAt}
@@ -334,7 +416,7 @@ function Message(msg, room) {
             <div key={msg.id} className="message other">
                 <button className='avt' style={{ width: 15, height: 15 }} />
                 <div className="message-box">
-                    {room && (<p className='sender-mess'>Duy đã gửi tin nhắn</p>)}
+                    {room && (<p className='sender-mess'>{msg.name} đã gửi tin nhắn</p>)}
                     <div className="message-content">
                         {isCloudinaryImage(msg.mes) ? (
                             getCloudinaryFileType(msg.mes) === "image" ? (
@@ -344,12 +426,12 @@ function Message(msg, room) {
                                     style={{ maxWidth: 240, borderRadius: 8 }}
                                 />
                             ) : (//how to display UI for file message
-                                    <a href={msg.mes} target="_blank" rel="noopener noreferrer">
-                                        {getCloudinaryFileName(msg.mes) || "Download File"}
-                                    </a>
+                                <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                    {getCloudinaryFileName(msg.mes) || "Download File"}
+                                </a>
                             )
                         ) : (
-                            <p>{msg.mes}</p>
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{decodeEmoji(msg.mes)}</p>
                         )}
                         <span className="time-send">
                             {msg.createAt}
@@ -377,7 +459,6 @@ function ImagePicker({ onSelect }) {
 
     return (
         <>
-
             <button onClick={openFileDialog}
                 className='image-btn' />
 
@@ -391,7 +472,7 @@ function ImagePicker({ onSelect }) {
         </>
     )
 }
-function ImagePreview({ file }) {
+function ImagePreview({ file, onRemoveImage }) {
     const [preview, setPreview] = useState(null)
 
     useEffect(() => {
@@ -404,10 +485,14 @@ function ImagePreview({ file }) {
     }, [file])
 
     if (!preview) return null
+    const removeImage = () => {
+        onRemoveImage(null)
+        setPreview(null)
+    }
 
     return (
         <div className='image-preview'>
-            <button className='remove-image'>x</button>
+            <button className='remove-image' onClick={() => removeImage()}>x</button>
             <img
                 src={preview}
                 alt="preview"

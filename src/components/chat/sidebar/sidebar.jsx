@@ -49,6 +49,7 @@ function Sidebar({ onFilterChange }) {
 
         console.log(`Tạo room: ${roomName}`);
         sendMessage(SocketRequests.createRoom(roomName));
+        sendMessage(SocketRequests.joinRoom(roomName))
         setRoomName('');
     }
     const handleSearch = (e) => {
@@ -76,7 +77,6 @@ function Sidebar({ onFilterChange }) {
             console.log("Search query empty");
             return;
         }
-
         // further implementation here
 
         const packet = SocketRequests.joinRoom(searchQuery);

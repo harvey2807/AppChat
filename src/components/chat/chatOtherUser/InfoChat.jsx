@@ -1,5 +1,5 @@
 import './InfoChat.css'
-import { use, useContext, useState } from 'react'
+import { use, useContext, useEffect, useState } from 'react'
 import useMediaQuery from '../../../hooks/useMediaQuery';
 import toggleDown from '../../../assets/images/toggledown.png'
 import toggleUp from '../../../assets/images/upload.png'
@@ -8,7 +8,7 @@ import downloadLightBtn from '../../../assets/images/download-light.png'
 import { ThemeContext } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useWebSocket } from '../../../context/WebSocketContext';
-function InfoChat({ room, chat }) {
+function InfoChat({ room, chat, mess, listMemberInRoom }) {
     const isMobile = useMediaQuery("(max-width: 992px)");
     const [showInforChat, setShowInforChat] = useState(false);
     const [showInforUser, setShowInforUser] = useState(false);
@@ -16,22 +16,27 @@ function InfoChat({ room, chat }) {
     const [showListMem, setShowListMem] = useState(false)
     const [showMedia, setShowMedia] = useState(true)
     const username = localStorage.getItem("USER")
-    const {logout} = useAuth()
-    const {disconnect } = useWebSocket();
+    const { logout } = useAuth()
+    const { disconnect } = useWebSocket();
 
     const changeMedia = () => {
         if (choseMedia === 0) setChoseMedia(1)
         else setChoseMedia(0)
         console.log(choseMedia)
     }
+    const [images, setImages] = useState([]);
 
-    const images = ["https://wp-cms-media.s3.ap-east-1.amazonaws.com/canh_dong_xanh_muot_tao_cam_giac_thu_thai_va_binh_yen_845456e2a6.jpg",
-        "https://nads.1cdn.vn/2024/11/22/74da3f39-759b-4f08-8850-4c8f2937e81a-1_mangeshdes.png",
-        "https://statictuoitre.mediacdn.vn/thumb_w/640/2017/7-1512755474943.jpg",
-        "https://img.tripi.vn/cdn-cgi/image/width=700,height=700/https://gcs.tripi.vn/public-tripi/tripi-feed/img/482812Fuv/anh-mo-ta.png",
-        "https://danangfantasticity.com/wp-content/uploads/2023/05/da-nang-trong-top-nhung-diem-den-co-phong-canh-nui-non-dep-nhat-chau-a.jpg"
+    const isCloudinaryImage = (text) =>
+        text.startsWith("https://res.cloudinary.com/")
 
-    ]
+    useEffect(() => {
+        const imgs = mess
+            ?.map(m => m.mes)
+            .filter(isCloudinaryImage) || [];
+
+        setImages(imgs);
+    }, [mess]);
+
     const files = ["filetest.txt",
         "bikieptangai.pdf",
         "cuu_am_chan_kinh.pdf"
@@ -63,14 +68,13 @@ function InfoChat({ room, chat }) {
                         {room && (
                             <div className="inforOtherUser">
                                 <div className="room-avt"></div>
-                                <p>{chat !== null ? chat.name: "User"}</p>
+                                <p>{chat !== null ? chat.name : "User"}</p>
                             </div>
                         )}
                         {!room && (
                             <div className="inforOtherUser">
                                 <div className="avt"></div>
-                                <p>{chat !== null ? chat.name: "User"}</p>
-                                {/* isOnline:""} */}
+                                <p>{chat !== null ? chat.name : "User"}</p>
                             </div>
                         )}
 
@@ -86,8 +90,8 @@ function InfoChat({ room, chat }) {
                                     </div>
                                     {showListMem && (
                                         <div className="list-mem-box">
-                                            {listMem.map(mem => (
-                                                <div key={mem.name} className='mem-info'>
+                                            {listMemberInRoom.map((mem, index) => (
+                                                <div key={index} className='mem-info'>
                                                     <button className='avt' style={{ width: 15, height: 15 }} />
                                                     <p>{mem.name}</p>
                                                 </div>
@@ -121,9 +125,9 @@ function InfoChat({ room, chat }) {
                                             style={
                                                 { visibility: choseMedia === 0 ? "visible" : "hidden" }
                                             }>
-                                            {images.map((url, index) => (
-                                                <div key={url} className="col-4 img">
-                                                    <img key={index} src={url} alt={`img-${index}`} />
+                                            {Array.isArray(images) && images.map((url, index) => (
+                                                <div key={index} className="col-4 img">
+                                                    <img src={url} alt={`img-${index}`} />
                                                 </div>
                                             ))}
                                         </div>
@@ -215,9 +219,9 @@ function InfoChat({ room, chat }) {
                                         style={
                                             { visibility: choseMedia === 0 ? "visible" : "hidden" }
                                         }>
-                                        {images.map((url, index) => (
-                                            <div className="col-4 img">
-                                                <img key={index} src={url} alt={`img-${index}`} />
+                                        {Array.isArray(images) && images.map((url, index) => (
+                                            <div key={index} className="col-4 img">
+                                                <img src={url} alt={`img-${index}`} />
                                             </div>
                                         ))}
                                     </div>

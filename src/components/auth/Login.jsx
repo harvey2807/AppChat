@@ -20,7 +20,7 @@ function Login() {
         usernameRef.current = username;
         sendMessage(SocketRequests.login(usernameRef.current, password));
         // sendMessage(SocketRequests.login(username, password));
-        localStorage.setItem("USERNAME", username)
+        localStorage.setItem("USER", username)
     };
 
     useEffect(() => {
@@ -32,12 +32,11 @@ function Login() {
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
-            const username = localStorage.getItem("USERNAME")
+            const username = localStorage.getItem("USER")
             if (msg.event === "LOGIN" && msg.status === "success") {
                 setIsAuthenticated(true);
                 console.log("Login successful for usersrrrrr:", msg.event);
                 loginSuccess(username, msg.data.RE_LOGIN_CODE);
-
             }
 
             if (msg.event === "LOGIN" && msg.status === "error") {

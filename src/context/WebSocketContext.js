@@ -31,7 +31,6 @@ export function WebSocketProvider({ children }) {
             const user = localStorage.getItem("USER")
             if (reloginCode && user) {
                 sendMessage(SocketRequests.reLogin(user, reloginCode))
-                sendMessage(SocketRequests.login("duy","123"))
             }
         };
 
@@ -51,17 +50,19 @@ export function WebSocketProvider({ children }) {
             );
         };
 
+        socket.onclose = () => {
+            console.log("WebSocket disconnected");
+            setIsConnected(false);
+            if (!isConnected) connect();
+        };
 
-        // socket.onclose = () => {
-        //     console.log("WebSocket disconnected");
-        //     setIsConnected(false);
-        // };
     }, []);
 
     const disconnect = useCallback(() => {
         socketRef.current?.close();
         socketRef.current = null;
     }, []);
+    
     const sendMessage = useCallback((payload) => {
         if (socketRef.current?.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify(payload));

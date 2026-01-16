@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
 
-function ListMess({ onSelectChat, filter, setRoom }) {
+function ListMess({ onSelectChat, filter, setRoom, setShowChatList }) {
     const { users, onlineStatus, lastMessages } = useChatList();
     // 2. Logic lọc danh sách dựa trên filter
     const filteredUsers = users.filter((user) => {
@@ -24,14 +24,16 @@ function ListMess({ onSelectChat, filter, setRoom }) {
     return (
         <div className="chat-list"> 
             <div className="list-group list-group-flush">
-                {filteredUsers.map((user) => (
+                {filteredUsers.map((user, index) => (
                     <ConversationItem
-                        key={user.name}
+                        key={index}
                         user={user}
                         isOnline={onlineStatus[user.name]}
                         // lastMessage={lastMessages[user.name]}
                         onClick={() => {
                             onSelectChat(user);
+                            setShowChatList(false);
+                            // console.log("Đã show chat list")
                             if (user.type === 1) {
                                 setRoom(true)
                             }

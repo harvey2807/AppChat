@@ -32,7 +32,6 @@ p {
     border-radius: 15px;
     background-color: var(--bg);
     color: var(--text);
-    overflow-y: auto;
 }
 
 .inforOtherUser {
@@ -61,6 +60,7 @@ p {
 
 .media-detail-box {
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -92,6 +92,7 @@ p {
 .media {
     width: 100%;
     height: 90%;
+    overflow-y: auto;
     position: relative;
     border-top: solid 1px gray;
     padding: 10px 30px;
@@ -232,7 +233,6 @@ img {
 .inforOtherUserBoxMobile {
     width: 30%;
     height: 90%;
-    overflow-y: auto;
     border-radius: 15px;
     background-color: var(--bg);
     color: var(--text);

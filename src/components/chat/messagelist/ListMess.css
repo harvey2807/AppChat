@@ -23,7 +23,7 @@
     color: var(--text);
 }
 
-.chat-list .list-group-item {   
+.chat-list .list-group-item {
     background-color: var(--bg);
     border-radius: 10px;
     border: none;
@@ -32,7 +32,7 @@
     margin-top: 10px;
 }
 
-.avatar{
+.avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -49,20 +49,22 @@
     border-radius: 50%;
     background-color: #0cff5d;
 }
+
 @media(max-width: 1200px) {
-    .avatar{
+    .avatar {
         height: 30px;
     }
 }
 
 .status-dot.online {
-  background-color: #0cff5d;
+    background-color: #0cff5d;
 }
 
 /* Offline */
 .status-dot.offline {
-  background-color: #adb5bd;
+    background-color: #adb5bd;
 }
+
 @media(max-width: 992px) {
     .chat-list {
         width: 95%;
@@ -85,7 +87,8 @@
         justify-content: center;
         align-items: center;
     }
-    .avatar{
+
+    .avatar {
         width: 30px;
         height: 30px;
     }
