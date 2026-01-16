@@ -27,6 +27,7 @@ export const useChatList = () => {
     useEffect(() => {
         if (isConnected || isAuth) {
             sendMessage(SocketRequests.getUserList());
+
         }
     }, []);
 
@@ -60,11 +61,12 @@ export const useChatList = () => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
 
+
                     sendMessage(SocketRequests.checkUserOnline(user.name));
 
                     const recentUsers = [...users]
                         .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                        .slice(0, 13);
+                    // console.log("user", recentUsers)
                     messageQueueRef.current = recentUsers;
 
                 }
@@ -77,40 +79,40 @@ export const useChatList = () => {
         }
     }, []);
 
-    const processNextMessage = useCallback(() => {
-        if (!isConnected || !isAuthenticated) {
-            console.log("Queue stopped: disconnected");
-            return;
-        }
+    // const processNextMessage = useCallback(() => {
+    //     if (!isConnected || !isAuthenticated) {
+    //         console.log("Queue stopped: disconnected");
+    //         return;
+    //     }
 
-        if (isProcessingQueueRef.current) {
-            console.log("Already processing, skipping");
-            return;
-        }
+    //     if (isProcessingQueueRef.current) {
+    //         console.log("Already processing, skipping");
+    //         return;
+    //     }
 
-        if (messageQueueRef.current.length === 0) {
-            console.log("All messages fetched!");
-            return;
-        }
+    //     if (messageQueueRef.current.length === 0) {
+    //         console.log("All messages fetched!");
+    //         return;
+    //     }
 
-        const user = messageQueueRef.current.shift();
-        if (!user || fetchedMessagesRef.current.has(user.name)) {
-            processNextMessage();
-            return;
-        }
+    //     const user = messageQueueRef.current.shift();
+    //     if (!user || fetchedMessagesRef.current.has(user.name)) {
+    //         processNextMessage();
+    //         return;
+        // }
 
-        isProcessingQueueRef.current = true;
-        fetchedMessagesRef.current.add(user.name);
+    //     isProcessingQueueRef.current = true;
+    //     fetchedMessagesRef.current.add(user.name);
 
-        console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
+    //     console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
 
-        if (user.type === 0) {
-            console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
-            sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
-        } else if (user.type === 1) {
-            sendMessage(SocketRequests.getRoomMessages(user.name, 1));
-        }
-    }, [isConnected, isAuthenticated, sendMessage]);
+    //     if (user.type === 0) {
+    //         // console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
+    //         sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
+    //     } else if (user.type === 1) {
+    //         sendMessage(SocketRequests.getRoomMessages(user.name, 1));
+    //     }
+    // }, [isConnected, isAuthenticated, sendMessage]);
 
     // useEffect(() => {
     //     if (isConnected || users.length > 0) {
@@ -142,7 +144,10 @@ export const useChatList = () => {
                 break;
 
             case "CHECK_USER_ONLINE":
+                console.log("Received online status:", data);
                 const userChecked = checkQueueRef.current.shift();
+                console.log("Checking online status for:", userChecked);
+                console.log("data status", data)
                 if (userChecked) {
                     onlineCheckCountRef.current++;
                     console.log(`[${onlineCheckCountRef.current}/${users.length}] ${userChecked}: ${data.status ? 'online' : 'offline'}`);
@@ -192,6 +197,7 @@ export const useChatList = () => {
             //     isProcessingQueueRef.current = false;
             //     setTimeout(processNextMessage, 100);
             //     break;
+
 
             // default:
             //     if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {
