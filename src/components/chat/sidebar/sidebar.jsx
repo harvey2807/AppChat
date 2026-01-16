@@ -8,7 +8,10 @@ import {SocketRequests} from "../../../hooks/useWebSocket";
 
 function Sidebar({ onFilterChange }) {
     const [selectedFilter, setSelectedFilter] = useState('all');
-    const [chooseRoom, setChooseRoom] = useState(false)
+    const [chooseRoom, setChooseRoom] = useState(false);
+    const [roomName, setRoomName] = useState(''); 
+
+    // const [chooseRoom, setChooseRoom] = useState(false)
     const { sendMessage, isConnected } = useWebSocket();
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -23,11 +26,31 @@ function Sidebar({ onFilterChange }) {
         if (onFilterChange) {
             onFilterChange(filter);
         }
+        
         if (filter === 'room') {
-            setChooseRoom(true)
+            setChooseRoom(true);
+        } else {
+            setChooseRoom(false);
         }
     }
 
+    const handleCreateRoom = (e) => {
+        e.preventDefault(); 
+        
+        if (!roomName.trim()) {
+            alert('Vui lòng nhập tên room!');
+            return;
+        }
+
+        if (!isConnected ) {
+            alert('Chưa kết nối hoặc chưa đăng nhập!');
+            return;
+        }
+
+        console.log(`Tạo room: ${roomName}`);
+        sendMessage(SocketRequests.createRoom(roomName));
+        setRoomName('');
+    }
     const handleSearch = (e) => {
         e.preventDefault();
         // check searchQuery
@@ -66,8 +89,17 @@ function Sidebar({ onFilterChange }) {
                 <div className="side-bar">
                     <h1 className="name">Chat Conversation</h1>
                     <div className="buttonSide">
-                        <form className="d-flex search" role="search" onSubmit={handleSearch}>
-                            <input className="form-control me-2" type="search" style={{ width: "80%" }} placeholder="Search" aria-label="Search" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                        <form className="d-flex search" role="search" onSubmit={handleCreateRoom}>
+                            <input 
+                                className="form-control me-2" 
+                                type="text" 
+                                style={{ width: "80%" }} 
+                                placeholder={chooseRoom ? "Nhập tên room" : "Search"} 
+                                aria-label="Search"
+                                value={roomName}
+                                onChange={(e) => setRoomName(e.target.value)}
+                            />
+
                             <button className="btn btn-outline-success" type="submit">Search</button>
                         </form>
                         <div className="filter-buttons d-flex gap-2">
@@ -76,7 +108,8 @@ function Sidebar({ onFilterChange }) {
                             <button type="button" onClick={() => handleClick('all')} className="btn btn-outline-success">All</button>
                             <button type="button" onClick={() => handleClick('room')} className="btn btn-outline-success">Room</button>
                             {chooseRoom && (
-                                <button type="button" className="btn join-btn" onClick={handeJoinRoom}></button>
+                                <button type="button" onClick={handleCreateRoom} className="btn btn-outline-success">Create</button>
+                                // <button type="button" className="btn join-btn" onClick={handeJoinRoom}></button>
                             )}
                         </div>
                     </div>
