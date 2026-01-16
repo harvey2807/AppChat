@@ -59,12 +59,11 @@ export const useChatList = () => {
             users.forEach((user) => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
-
                     sendMessage(SocketRequests.checkUserOnline(user.name));
 
                     const recentUsers = [...users]
                         .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                        .slice(0, 13);
+
                     messageQueueRef.current = recentUsers;
 
                 }
@@ -105,7 +104,7 @@ export const useChatList = () => {
         console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
 
         if (user.type === 0) {
-            console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
+            // console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
             sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
         } else if (user.type === 1) {
             sendMessage(SocketRequests.getRoomMessages(user.name, 1));
@@ -143,6 +142,7 @@ export const useChatList = () => {
 
             case "CHECK_USER_ONLINE":
                 const userChecked = checkQueueRef.current.shift();
+                console.log("Checked online status for user:", userChecked);
                 if (userChecked) {
                     onlineCheckCountRef.current++;
                     console.log(`[${onlineCheckCountRef.current}/${users.length}] ${userChecked}: ${data.status ? 'online' : 'offline'}`);
@@ -158,40 +158,6 @@ export const useChatList = () => {
                     }
                 }
                 break;
-
-            // case "GET_PEOPLE_CHAT_MES":
-            //     const peopleMessages = data;
-            //     if (Array.isArray(peopleMessages) && peopleMessages.length > 0) {
-            //         const sorted = [...peopleMessages].sort((a, b) =>
-            //             new Date(b.createAt) - new Date(a.createAt)
-            //         );
-            //         const lastMsg = sorted[0];
-            //         const key = lastMsg.name === currentUser ? lastMsg.to : lastMsg.name;
-
-            //         console.log(`Last message from ${key}: "${lastMsg.mes}"`);
-            //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-            //     }
-
-            //     isProcessingQueueRef.current = false;
-            //     setTimeout(processNextMessage, 100);
-            //     break;
-
-            // case "GET_ROOM_CHAT_MES":
-            //     const roomMessages = data?.chatData;
-            //     if (Array.isArray(roomMessages) && roomMessages.length > 0) {
-            //         const sorted = [...roomMessages].sort((a, b) =>
-            //             new Date(b.createAt) - new Date(a.createAt)
-            //         );
-            //         const lastMsg = sorted[0];
-            //         const key = lastMsg.to;
-
-            //         console.log(`Room ${key}: "${lastMsg.mes}"`);
-            //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-            //     }
-
-            //     isProcessingQueueRef.current = false;
-            //     setTimeout(processNextMessage, 100);
-            //     break;
 
             // default:
             //     if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {
