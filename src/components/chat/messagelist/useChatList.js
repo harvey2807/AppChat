@@ -27,10 +27,8 @@ export const useChatList = () => {
         // sendMessage(SocketRequests.login("luc", "12345"));
 
         if (isConnected || isAuth) {
-            console.log("isConnected:", isConnected, "isAuth:", isAuth);
             sendMessage(SocketRequests.getUserList());
-            console.log("Length of users after request:", users.length);
-            console.log("Đã lấy xong list user")
+         
         }
 
         // }
@@ -65,50 +63,49 @@ export const useChatList = () => {
             users.forEach((user) => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
-                    // console.log("Đang kiểm tra trạng thái online của user:", user.name);
                     const recentUsers = [...users]
                         .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                        
+                    // console.log("user", recentUsers)
                     messageQueueRef.current = recentUsers;
                 }
             });
         }
     }, [isConnected, users, sendMessage]);
 
-    const processNextMessage = useCallback(() => {
-        if (!isConnected || !isAuthenticated) {
-            console.log("Queue stopped: disconnected");
-            return;
-        }
+    // const processNextMessage = useCallback(() => {
+    //     if (!isConnected || !isAuthenticated) {
+    //         console.log("Queue stopped: disconnected");
+    //         return;
+    //     }
 
-        if (isProcessingQueueRef.current) {
-            console.log("Already processing, skipping");
-            return;
-        }
+    //     if (isProcessingQueueRef.current) {
+    //         console.log("Already processing, skipping");
+    //         return;
+    //     }
 
-        if (messageQueueRef.current.length === 0) {
-            console.log("All messages fetched!");
-            return;
-        }
+    //     if (messageQueueRef.current.length === 0) {
+    //         console.log("All messages fetched!");
+    //         return;
+    //     }
 
-        const user = messageQueueRef.current.shift();
-        if (!user || fetchedMessagesRef.current.has(user.name)) {
-            processNextMessage();
-            return;
-        }
+    //     const user = messageQueueRef.current.shift();
+    //     if (!user || fetchedMessagesRef.current.has(user.name)) {
+    //         processNextMessage();
+    //         return;
+        // }
 
-        isProcessingQueueRef.current = true;
-        fetchedMessagesRef.current.add(user.name);
+    //     isProcessingQueueRef.current = true;
+    //     fetchedMessagesRef.current.add(user.name);
 
-        console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
+    //     console.log(`[${13 - messageQueueRef.current.length}/13] Fetching: ${user.name}`);
 
-        if (user.type === 0) {
-            // console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
-            sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
-        } else if (user.type === 1) {
-            sendMessage(SocketRequests.getRoomMessages(user.name, 1));
-        }
-    }, [isConnected, isAuthenticated, sendMessage]);
+    //     if (user.type === 0) {
+    //         // console.log(`Sending GET_PEOPLE_CHAT_MES for ${user.name}`);
+    //         sendMessage(SocketRequests.getPeopleMessages(user.name, 1));
+    //     } else if (user.type === 1) {
+    //         sendMessage(SocketRequests.getRoomMessages(user.name, 1));
+    //     }
+    // }, [isConnected, isAuthenticated, sendMessage]);
 
     // useEffect(() => {
     //     if (isConnected || users.length > 0) {
@@ -136,12 +133,15 @@ export const useChatList = () => {
                 if (Array.isArray(data)) {
                     // console.log("Received user list:", data);
                     setUsers(data);
+                    console.log("User list updated:", data);
                 }
                 break;
 
             case "CHECK_USER_ONLINE":
+                console.log("Received online status:", data);
                 const userChecked = checkQueueRef.current.shift();
-                console.log("Checked online status for user:", userChecked);
+                console.log("Checking online status for:", userChecked);
+                console.log("data status", data)
                 if (userChecked) {
                     onlineCheckCountRef.current++;
                     console.log(`[${onlineCheckCountRef.current}/${users.length}] ${userChecked}: ${data.status ? 'online' : 'offline'}`);

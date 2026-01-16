@@ -70,6 +70,7 @@ function InfoChat({ room, chat }) {
                             <div className="inforOtherUser">
                                 <div className="avt"></div>
                                 <p>{chat !== null ? chat.name: "User"}</p>
+                                {/* isOnline:""} */}
                             </div>
                         )}
 

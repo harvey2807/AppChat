@@ -201,6 +201,7 @@ function ChatOtherUser({ room, chat, mess, isInRoom, error }) {
                     <div className="chat-box-header">
                         <button className='avt' />
                         <p className='user-name'>{chat !== null ? chat.name : "User"}</p>
+                        <span className={`status-dot ${chat && chat.isOnline ? 'online' : 'offline'}`}></span>
                         <button className='theme-btn'
                             onClick={toggleTheme}
                             style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
