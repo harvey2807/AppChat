@@ -37,12 +37,16 @@ function Sidebar({ onFilterChange }) {
         }
 
         // check websocket connection
-        if (!isConnected) {
-            console.log("WebSocket not connected");
-            return;
-        }
+        // if (!isConnected) {
+        //     console.log("WebSocket not connected");
+        //     return;
+        // }
 
         // further implementation here
+        console.log("Searching for:", searchQuery, "if exists");
+        const packet = SocketRequests.checkUserExist(searchQuery);
+        sendMessage(packet);
+        console.log("sent message to check user exist:", packet);
 
     }
 
@@ -57,7 +61,8 @@ function Sidebar({ onFilterChange }) {
         // further implementation here
 
         const packet = SocketRequests.joinRoom(searchQuery);
-        console.log(sendMessage(packet));
+        sendMessage(packet);
+        console.log("sent message to join room:", packet);
     }
 
     return (
