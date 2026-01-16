@@ -27,7 +27,6 @@ export const AuthProvider = ({ children }) => {
 
     localStorage.setItem("USER",user);
     localStorage.setItem("RE_LOGIN_CODE", code);
-    localStorage.setItem("RELOGIN_COUNT", 0)
   };
 
   const logout = () => {

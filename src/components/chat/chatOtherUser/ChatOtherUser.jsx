@@ -52,8 +52,8 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
     useEffect(() => {
         if (!chat) return;
-        if(!isActive(chat.name, chat.type)) return;
-        console.log("Chat đang active : " + isActive(chat.name, chat.type))
+        // if(!isActive(chat.name, chat.type)) return;
+        // console.log("Chat đang active : " + isActive(chat.name, chat.type))
         const interval = setInterval(() => {
             if (chat.type === 1) {
                 sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
@@ -162,10 +162,10 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         }
     }
 
+
     const sendNude = async () => {
         setUploading(true)
 
-        console.log("Send message:", text);
         // FOR TESTING PURPOSES ONLY
         // dstUser = "tttt" // REMOVE THIS LINE IN PRODUCTION
         // dstRoom = "room1" // REMOVE THIS LINE IN PRODUCTION
@@ -178,13 +178,13 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             if (room && isInRoom) {
                 sendMessage(SocketRequests.sendToRoom(chat.name, imageUrl));
                 //append ngay cho UI
-                handleSendMessage(chat.name, chat.type, imageUrl)
-                // sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
+                // handleSendMessage(chat.name, chat.type, imageUrl)
+                sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
 
             } else if (!room) {
                 sendMessage(SocketRequests.sendToPeople(chat.name, imageUrl));
-                handleSendMessage(chat.name, chat.type, imageUrl)
-                // sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
+                // handleSendMessage(chat.name, chat.type, imageUrl)
+                sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
             }
         }
         // get msg text
@@ -197,40 +197,41 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         // reset input
         setText("");
 
+        console.log("Send message:", msgText);
         // send msg
         console.log("Message packaging...");
         // check whether send message to room or people
         console.log(`Room :${room}, In Room: ${isInRoom}, Chat type: ${chat.type}`)
         if (room && isInRoom) {
-            const packet = SocketRequests.sendToRoom(chat.name, msgText);
+            const packet = SocketRequests.sendToRoom(chat.name, encodeEmoji(msgText));
             console.log("Sending packet:", packet);
-            handleSendMessage(chat.name, chat.type, msgText)
+            // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
-            // sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
+            sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
         } else if (!room) {
-            const packet = SocketRequests.sendToPeople(chat.name, msgText);
+            const packet = SocketRequests.sendToPeople(chat.name, encodeEmoji(msgText));
             console.log("Sending packet:", packet);
-            handleSendMessage(chat.name, chat.type, msgText)
+            // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
-            // sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
+            sendMessage(SocketRequests.getPeopleMessages(chat.name, 1))
         }
         setUploading(false)
         return;
     }
 
-    const handleSendMessage = (chatName, type, msg) => {
-        const chatType = type === 1 ? 'room' : 'people';
-        console.log("Chat type là " + chatType)
-        //  append local message
-        setListMessages(prev => [{
-            id: `local-${Date.now()}`,
-            name: user,
-            type: chatType,
-            to: chatName,
-            mes: msg,
-            createAt: new Date().toISOString()
-        }, ...prev]);
-    };
+    // const handleSendMessage = (chatName, type, msg) => {
+    //     const chatType = type === 1 ? 'room' : 'people';
+    //     console.log("Chat type là " + chatType)
+    //     //  append local message
+    //     setListMessages(prev => [{
+    //         id: `local-${Date.now()}`,
+    //         name: user,
+    //         type: chatType,
+    //         to: chatName,
+    //         mes: msg,
+    //         createAt: new Date().toISOString()
+    //     }, ...prev]);
+    // };
 
     return (
         <>
@@ -315,6 +316,20 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         </>
     )
 }
+const encodeEmoji = (text) => {
+    const bytes = new TextEncoder().encode(text);
+    return btoa(String.fromCharCode(...bytes));
+};
+
+const decodeEmoji = (text) => {
+    try {
+        const bytes = Uint8Array.from(atob(text), c => c.charCodeAt(0));
+        return new TextDecoder().decode(bytes);
+    } catch {
+        return text;
+    }
+};
+
 
 const isCloudinaryImage = (text) =>
     text.startsWith("https://res.cloudinary.com/")
@@ -331,7 +346,7 @@ function Message(msg, room) {
                             style={{ maxWidth: 240, borderRadius: 8 }}
                         />
                     ) : (
-                        <p>{msg.mes}</p>
+                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
                     )}
                     <span className="time-send">
                         {msg.createAt}
@@ -354,7 +369,7 @@ function Message(msg, room) {
                                 style={{ maxWidth: 240, borderRadius: 8 }}
                             />
                         ) : (
-                            <p>{msg.mes}</p>
+                            <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
                         )}
                         <span className="time-send">
                             {msg.createAt}

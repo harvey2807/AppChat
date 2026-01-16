@@ -90,6 +90,8 @@ function ConsersationLayout() {
             console.log("BẮt được sự kiện rồi 1 - " + msg.event)
             switch (msg.event) {
                 case "RE_LOGIN":
+                    console.log("Đã gọi relogin với status: " + msg.status + " Và nội dung là : " + msg.data)
+                    localStorage.setItem("RE_LOGIN_CODE", msg.data.RE_LOGIN_CODE)
                     sendMessage(SocketRequests.getUserList())
                     break;
                 case "GET_USER_LIST":
@@ -107,8 +109,8 @@ function ConsersationLayout() {
                     }
                     setListMessages(prev => {
                         const map = new Map();
-                        prev.forEach(m => map.set(m.id, m));
                         messOfPeople.forEach(m => map.set(m.id, m));
+                        prev.forEach(m => map.set(m.id, m));
                         return Array.from(map.values());
                     });
                     break;
@@ -126,8 +128,8 @@ function ConsersationLayout() {
 
                     setListMessages(prev => {
                         const map = new Map();
-                        prev.forEach(m => map.set(m.id, m));
                         messOfRoom.forEach(m => map.set(m.id, m));
+                        prev.forEach(m => map.set(m.id, m));
                         return Array.from(map.values());
                     });
                     break;
@@ -141,14 +143,55 @@ function ConsersationLayout() {
     }, []);
 
     return (
-        <div className='chat-container'>
-            {isMobile && (
-                <>
-                    <div className='chat-left' style={{ width: showChatList ? '100%' : '5%' }}>
-                        <div className='icon-menu' style={{ width: showChatList ? '5%' : '100%' }}>
-                            <button className="chat-icon" onClick={() => setShowChatList(true)} />
+        <>
+            <div className='chat-container'>
+                {/* <div className="end-session">
+                    <div className="box">
+                        <p>Đã hết phiên, vui lòng đăng nhập lại</p>
+                        <button className='btn-ok'>OK</button>
+                    </div>
+                </div> */}
+                {isMobile && (
+                    <>
+                        <div className='chat-left' style={{ width: showChatList ? '100%' : '5%' }}>
+                            <div className='icon-menu' style={{ width: showChatList ? '5%' : '100%' }}>
+                                <button className="chat-icon" onClick={() => setShowChatList(true)} />
+                            </div>
+                            {showChatList && (
+                                <div className='chat-left-content'>
+                                    <Sidebar onFilterChange={handleFilterChange} />
+                                    <ListMess
+                                        onSelectChat={setSelectedChat}
+                                        filter={filterType}
+                                        setRoom={setRoom}
+                                        setShowChatList={setShowChatList} />
+                                </div>
+                            )}
                         </div>
-                        {showChatList && (
+                        {!showChatList && (
+                            <div className='chat-right'>
+                                <ChatOtherUser
+                                    room={room}
+                                    chat={selectedChat}
+                                    mess={listMessages}
+                                    setListMessages={setListMessages}
+                                    isInRoom={isInRoom}
+                                    hasMore={hasMore}
+                                    onLoadMore={loadMoreMessages}
+                                    isActive={isChatActive} />
+                                <InfoChat
+                                    room={room}
+                                    chat={selectedChat}
+                                    mess={listMessages}
+                                    listMemberInRoom={listMemberInRoom} />
+                            </div>
+                        )}
+                    </>
+                )}
+                {!isMobile && (
+                    <>
+                        <div className='chat-left'>
+                            <button className="chat-icon" onClick={() => setShowChatList(true)} />
                             <div className='chat-left-content'>
                                 <Sidebar onFilterChange={handleFilterChange} />
                                 <ListMess
@@ -157,9 +200,8 @@ function ConsersationLayout() {
                                     setRoom={setRoom}
                                     setShowChatList={setShowChatList} />
                             </div>
-                        )}
-                    </div>
-                    {!showChatList && (
+
+                        </div>
                         <div className='chat-right'>
                             <ChatOtherUser
                                 room={room}
@@ -176,43 +218,10 @@ function ConsersationLayout() {
                                 mess={listMessages}
                                 listMemberInRoom={listMemberInRoom} />
                         </div>
-                    )}
-                </>
-            )}
-            {!isMobile && (
-                <>
-                    <div className='chat-left'>
-                        <button className="chat-icon" onClick={() => setShowChatList(true)} />
-                        <div className='chat-left-content'>
-                            <Sidebar onFilterChange={handleFilterChange} />
-                            <ListMess
-                                onSelectChat={setSelectedChat}
-                                filter={filterType}
-                                setRoom={setRoom}
-                                setShowChatList={setShowChatList} />
-                        </div>
-
-                    </div>
-
-                    <div className='chat-right'>
-                        <ChatOtherUser
-                            room={room}
-                            chat={selectedChat}
-                            mess={listMessages}
-                            setListMessages={setListMessages}
-                            isInRoom={isInRoom}
-                            hasMore={hasMore}
-                            onLoadMore={loadMoreMessages}
-                            isActive={isChatActive} />
-                        <InfoChat
-                            room={room}
-                            chat={selectedChat}
-                            mess={listMessages}
-                            listMemberInRoom={listMemberInRoom} />
-                    </div>
-                </>
-            )}
-        </div>
+                    </>
+                )}
+            </div>
+        </>
     );
 }
 

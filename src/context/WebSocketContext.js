@@ -24,7 +24,6 @@ export const useWebSocket = () => {
             const user = localStorage.getItem("USER")
             if (reloginCode && user) {
                 sendMessage(SocketRequests.reLogin(user, reloginCode))
-                sendMessage(SocketRequests.login(user, localStorage.getItem("PASSWORD")))
             }
         };
 
@@ -46,6 +45,7 @@ export const useWebSocket = () => {
         socket?.close();
         socket = null;
     }, []);
+    
     const sendMessage = useCallback((payload) => {
         if (socket?.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify(payload));
