@@ -288,55 +288,55 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
                 {selectedFile && (
                     <>
-    {
-        selectedFile.type.startsWith("image/") ? (
-            <ImagePreview file={selectedFile} className="image-preview" />
-        ) : (
-        <FilePreview file={selectedFile} className="file-preview" />
-    )
-    }
+                        {
+                            selectedFile.type.startsWith("image/") ? (
+                                <ImagePreview file={selectedFile} className="image-preview" />
+                            ) : (
+                                <FilePreview file={selectedFile} onRemove={setSelectedFile} className="file-preview" />
+                            )
+                        }
 
                     </>
                 )
-}
-<div className="chat-input">
-    <ImagePicker onSelect={setSelectedFile} />
-    <FilePicker onSelect={setSelectedFile} />
-    {/* <button className='file-btn' /> */}
-    <div className="form-chat">
-        <textarea className="chat-text"
-            ref={textareaRef}
-            rows="1"
-            value={text}
-            onChange={e => setText(e.target.value)}
-            onInput={handleInput}
-            onKeyDown={handleKeyDown}
-            onClick={() => setShowPicker(false)}
-            placeholder='Nhập tin nhắn . . .' />
-        <button className="icon-btn file-btn"
-            onClick={() => setShowPicker(prev => !prev)}
-        />
-        {uploading ? (
-            <div className="send-status">
-                <span className="dot dot-1"></span>
-                <span className="dot dot-2"></span>
-                <span className="dot dot-3"></span>
-            </div>
-        ) : (
-            <button className="send-btn file-btn" onClick={sendNude}></button>
-        )}
-    </div>
-    {showPicker && (
-        <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
-            <EmojiPicker
-                data={data}
-                onEmojiSelect={(emoji) =>
-                    setText(prev => prev + emoji.native)
                 }
-            />
-        </div>
-    )}
-</div>
+                <div className="chat-input">
+                    <ImagePicker onSelect={setSelectedFile} />
+                    <FilePicker onSelect={setSelectedFile} />
+                    {/* <button className='file-btn' /> */}
+                    <div className="form-chat">
+                        <textarea className="chat-text"
+                            ref={textareaRef}
+                            rows="1"
+                            value={text}
+                            onChange={e => setText(e.target.value)}
+                            onInput={handleInput}
+                            onKeyDown={handleKeyDown}
+                            onClick={() => setShowPicker(false)}
+                            placeholder='Nhập tin nhắn . . .' />
+                        <button className="icon-btn file-btn"
+                            onClick={() => setShowPicker(prev => !prev)}
+                        />
+                        {uploading ? (
+                            <div className="send-status">
+                                <span className="dot dot-1"></span>
+                                <span className="dot dot-2"></span>
+                                <span className="dot dot-3"></span>
+                            </div>
+                        ) : (
+                            <button className="send-btn file-btn" onClick={sendNude}></button>
+                        )}
+                    </div>
+                    {showPicker && (
+                        <div style={{ position: "absolute", bottom: "60px", right: "10px" }}>
+                            <EmojiPicker
+                                data={data}
+                                onEmojiSelect={(emoji) =>
+                                    setText(prev => prev + emoji.native)
+                                }
+                            />
+                        </div>
+                    )}
+                </div>
             </div >
         </>
     )
@@ -402,7 +402,7 @@ function Message(msg, room) {
                             </a>
                         )
                     ) : (
-                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
+                        <p style={{ whiteSpace: 'pre-wrap' }}>{decodeEmoji(msg.mes)}</p>
                     )}
                     <span className="time-send">
                         {msg.createAt}
@@ -533,30 +533,98 @@ function FilePicker({ onSelect }) {
     )
 }
 
-function FilePreview({ file }) {
+// function FilePreview({ file }) {
+//     const [preview, setPreview] = useState(null)
+
+//     useEffect(() => {
+//         if (!file) return
+
+//         const url = URL.createObjectURL(file)
+//         setPreview(url)
+
+//         return () => URL.revokeObjectURL(url)
+//     }, [file])
+
+//     if (!preview) return null
+
+//     return (
+//         <div className='file-preview'>
+//             <button className='remove-file'>x</button>
+//             <img
+//                 src={preview}
+//                 alt="preview"
+//                 style={{ maxWidth: 200, borderRadius: 8 }}
+//             />
+//         </div>
+//     )
+
+// }
+function FilePreview({ file, onRemove }) {
     const [preview, setPreview] = useState(null)
 
+    // Helper: Format dung lượng file (KB/MB)
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     useEffect(() => {
-        if (!file) return
+        if (!file) return;
 
-        const url = URL.createObjectURL(file)
-        setPreview(url)
+        // Chỉ tạo URL preview nếu là ảnh
+        if (file.type.startsWith("image/")) {
+            const url = URL.createObjectURL(file);
+            setPreview(url);
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setPreview(null);
+        }
+    }, [file]);
 
-        return () => URL.revokeObjectURL(url)
-    }, [file])
+    if (!file) return null;
 
-    if (!preview) return null
+    const isImage = file.type.startsWith("image/");
 
     return (
-        <div className='file-preview'>
-            <button className='remove-file'>x</button>
-            <img
-                src={preview}
-                alt="preview"
-                style={{ maxWidth: 200, borderRadius: 8 }}
-            />
+        <div className='file-preview-card'>
+            {/* Nút xóa */}
+            <button className='remove-file-btn' onClick={() => onRemove && onRemove(null)}>
+                ✕
+            </button>
+
+            {isImage ? (
+                /* Giao diện cho ẢNH */
+                <div className="preview-image-container">
+                    <img
+                        src={preview}
+                        alt="preview"
+                        className="preview-img"
+                    />
+                    <div className="file-info-overlay">
+                        <span className="file-name">{file.name}</span>
+                        <span className="file-size">{formatFileSize(file.size)}</span>
+                    </div>
+                </div>
+            ) : (
+                /* Giao diện cho FILE KHÁC (PDF, DOC, ETC.) */
+                <div className="preview-file-container">
+                    <div className="file-icon">
+                        {/* Icon tượng trưng (Dùng SVG inline cho gọn) */}
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                    <div className="file-details">
+                        <p className="file-name" title={file.name}>{file.name}</p>
+                        <p className="file-size">{formatFileSize(file.size)}</p>
+                    </div>
+                </div>
+            )}
         </div>
     )
-
 }
 export default ChatOtherUser
