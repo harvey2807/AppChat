@@ -50,7 +50,7 @@ function Sidebar({ onFilterChange }) {
         console.log(`Tạo room: ${roomName}`);
         sendMessage(SocketRequests.createRoom(roomName));
         sendMessage(SocketRequests.joinRoom(roomName))
-        setRoomName('');
+        setRoomName(roomName);
     }
     const handleSearch = (e) => {
         e.preventDefault();

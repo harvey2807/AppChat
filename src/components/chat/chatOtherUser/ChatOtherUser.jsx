@@ -32,6 +32,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     const chatContainerRef = useRef(null);
     const isAtBottomRef = useRef(true);
     const [error, setError] = useState("Hãy tham gia phòng để gửi tin nhắn!");
+    let nameFile = useState("");
 
     const prevScrollHeightRef = useRef(0);
 
