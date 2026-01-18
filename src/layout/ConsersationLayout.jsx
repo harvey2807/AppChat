@@ -24,6 +24,7 @@ function ConsersationLayout() {
     const [listMemberInRoom, setListMemberInRoom] = useState([])
     const [hasMore, setHasMore] = useState(true);
     const [page, setPage] = useState(1);
+    const [isOnline, setIsOnline] = useState(false);
     const selectedChatRef = useRef(null);
     const [reloginError, setReloginError] = useState(false)
 
@@ -46,12 +47,30 @@ function ConsersationLayout() {
     }, [])
 
     useEffect(() => {
+        //check online status every 30s
+        const interval = setInterval(() => {
+            if (selectedChatRef.current) {
+                checkUserOnline(selectedChatRef.current.name);
+                console.log("Đang kiểm tra trạng thái online cho: " + selectedChatRef.current.name)
+            }
+        }, 30000);
+        console.log("Đã khởi động kiểm tra trạng thái online mỗi 30s", interval);
+        return () => clearInterval(interval);
+    }, [selectedChat]);
+
+    useEffect(() => {
         if (!selectedChat) return
         setPage(1);
         setHasMore(true);
         setIsInRoom(false)
         setListMessages([])
         setListMemberInRoom([])
+        setIsOnline(false)
+
+        if(selectedChat.type !== 1){
+            checkUserOnline(selectedChat.name);
+        }
+
         if (selectedChat.type === 1) {
             // checkInRoom(selectedChat)
             console.log("Chat da duoc chon: " + selectedChat.name)
@@ -83,7 +102,13 @@ function ConsersationLayout() {
         );
     };
 
-
+    const checkUserOnline = () => {
+        // Implement your logic to check if the user is online
+        // This is a placeholder implementation
+        console.log("Kiểm tra trạng thái online cho: " + selectedChat?.name)
+        const abc = sendMessage(SocketRequests.checkUserOnline(selectedChat?.name));
+        console.log("Kết quả kiểm tra online: ", abc);
+    }
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
@@ -143,31 +168,19 @@ function ConsersationLayout() {
                     });
 
                     break;
+                case "CHECK_USER_ONLINE":
+                    // const checkedUser = msg.data.user;
+                    // const status = msg.data.status;
+                    // console.log(`User ${checkedUser} is ${status ? 'online' : 'offline'}`);
+                    // Cập nhật trạng thái online của người dùng nếu cần
+                    console.log(
+                        `User ${selectedChatRef.current?.name} is`,
+                        msg.data.status ? "ONLINE" : "OFFLINE"
+                    );
+                    setIsOnline(msg.data.status);
+                    break;
                 case "GET_ROOM_CHAT_MES":
-                    const messOfRoom = msg.data.chatData.length ? msg.data.chatData : [];
-                    if (!messOfRoom || messOfRoom.length === 0) {
-                        setHasMore(false);
-                        return;
-                    }
 
-                    const joined = Array.isArray(msg.data?.userList)
-                        && msg.data.userList.some(u => u.name === user);
-                    setListMemberInRoom(msg.data.userList)
-                    setIsInRoom(joined);
-
-                    setListMessages(prev => {
-                        const map = new Map();
-
-                        // 1. merge + dedupe
-                        [...prev, ...messOfRoom].forEach(m => {
-                            map.set(m.id, m);
-                        });
-
-                        // 2. sort theo thời gian
-                        return Array.from(map.values()).sort(
-                            (a, b) => new Date(b.createAt) - new Date(a.createAt)
-                        );
-                    });
                     break;
                 default:
                     break;
@@ -221,7 +234,8 @@ function ConsersationLayout() {
                                     isInRoom={isInRoom}
                                     hasMore={hasMore}
                                     onLoadMore={loadMoreMessages}
-                                    isActive={isChatActive} />
+                                    isActive={isChatActive}
+                                    isOnline={isOnline} />
                                 <InfoChat
                                     room={room}
                                     chat={selectedChat}

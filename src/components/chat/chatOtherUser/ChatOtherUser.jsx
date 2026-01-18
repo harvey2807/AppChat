@@ -13,7 +13,7 @@ import { SocketRequests } from "../../../hooks/useWebSocket";
 const userName = localStorage.getItem("USER")
 
 
-function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive }) {
+function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive, isOnline }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
@@ -116,7 +116,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const resourceType = isImage ? "image" : "raw";
 
         formData.append("file", file)
-        nameFile = file.name;
+        // nameFile = file.name;
         // formData.append("use_filename", "true")
         // formData.append("unique_filename", "true")
         // formData.append("overwrite", "false")
@@ -176,7 +176,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
             const imageUrl = await uploadImageToCloudinary(selectedFile)
             // nameFile = getCloudinaryFileName(imageUrl)
-            console.log("Uploaded image URL:", nameFile)
+            // console.log("Uploaded image URL:", nameFile)
             setSelectedFile(null)
             return imageUrl
         } catch (err) {
@@ -262,7 +262,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
                     <div className="chat-box-header">
                         <button className='avt' />
                         <p className='user-name'>{chat !== null ? chat.name : "User"}</p>
-                        <span className={`status-dot ${chat && chat.isOnline ? 'online' : 'offline'}`}></span>
+                        <span className={`status-dot ${isOnline ? 'online' : 'offline'}`}></span>
                         <button className='theme-btn'
                             onClick={toggleTheme}
                             style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />

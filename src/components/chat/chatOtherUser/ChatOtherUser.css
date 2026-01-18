@@ -32,7 +32,26 @@
     font-weight: 500;
     color: var(--text);
 }
+.status-dot {
+    height: 12px;           
+    width: 12px;           
+    border-radius: 50%;     
+    display: inline-block;  
+    margin-left: 10px;      
+    border: 2px solid white; 
+    transition: background-color 0.3s ease;
+}
 
+/* Màu khi Online */
+.status-dot.online {
+    background-color: #0cff5d; 
+    box-shadow: 0 0 5px #0cff5d; 
+}
+
+/* Màu khi Offline */
+.status-dot.offline {
+    background-color: #adb5bd;
+}
 .theme-btn {
     width: 30px;
     height: 30px;
