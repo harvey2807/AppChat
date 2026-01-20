@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/AppChat/static/css/main.cf6e3984.css",
+    "main.js": "/AppChat/static/js/main.c4a0f58e.js",
+    "static/js/453.28585478.chunk.js": "/AppChat/static/js/453.28585478.chunk.js",
+    "static/media/jpg": "/AppChat/static/media/b41bdc04a1040e5a571547.39a618c2a7144084ab5e.jpg",
+    "static/media/chat.png": "/AppChat/static/media/chat.cc9492b3144dfde49ea6.png",
+    "static/media/emoji.png": "/AppChat/static/media/emoji.d8541e187e9d1a086b1e.png",
+    "static/media/user.png": "/AppChat/static/media/user.b8d7a9aee29e0abd68ce.png",
+    "static/media/light.png": "/AppChat/static/media/light.c1dcd94e771de162b286.png",
+    "static/media/send.png": "/AppChat/static/media/send.a21c2c14fb6c884b8fe4.png",
+    "static/media/join_btn.png": "/AppChat/static/media/join_btn.d8c7b58b90bed77d57d3.png",
+    "static/media/file.png": "/AppChat/static/media/file.7edcaac351e3f01517ee.png",
+    "static/media/more.png": "/AppChat/static/media/more.cd24c9d7b8092bb15c18.png",
+    "static/media/icon-person.png": "/AppChat/static/media/icon-person.ba913dc5a3568d9b82cf.png",
+    "static/media/dark.png": "/AppChat/static/media/dark.cf2d6dd99c8b1668db8e.png",
+    "index.html": "/AppChat/index.html",
+    "main.cf6e3984.css.map": "/AppChat/static/css/main.cf6e3984.css.map",
+    "main.c4a0f58e.js.map": "/AppChat/static/js/main.c4a0f58e.js.map",
+    "453.28585478.chunk.js.map": "/AppChat/static/js/453.28585478.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.cf6e3984.css",
+    "static/js/main.c4a0f58e.js"
+  ]
+}
