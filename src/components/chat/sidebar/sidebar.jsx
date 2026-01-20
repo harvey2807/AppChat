@@ -6,10 +6,10 @@ import {SocketRequests} from "../../../hooks/useWebSocket";
 
 //here we need to catch api get user list 
 
-function Sidebar({ onFilterChange }) {
+function Sidebar({ onFilterChange, onSearchChat }) {
     const [selectedFilter, setSelectedFilter] = useState('all');
     const [chooseRoom, setChooseRoom] = useState(false);
-    const [roomName, setRoomName] = useState(''); 
+    // const [roomName, setRoomName] = useState(''); 
 
     // const [chooseRoom, setChooseRoom] = useState(false)
     const { sendMessage, isConnected } = useWebSocket();
@@ -37,7 +37,7 @@ function Sidebar({ onFilterChange }) {
     const handleCreateRoom = (e) => {
         e.preventDefault(); 
         
-        if (!roomName.trim()) {
+        if (!searchQuery.trim()) {
             alert('Vui lòng nhập tên room!');
             return;
         }
@@ -47,10 +47,9 @@ function Sidebar({ onFilterChange }) {
             return;
         }
 
-        console.log(`Tạo room: ${roomName}`);
-        sendMessage(SocketRequests.createRoom(roomName));
-        sendMessage(SocketRequests.joinRoom(roomName))
-        setRoomName('');
+        console.log(`Tạo room: ${searchQuery}`);
+        sendMessage(SocketRequests.createRoom(searchQuery));
+        setSearchQuery('');
     }
     const handleSearch = (e) => {
         e.preventDefault();
@@ -65,10 +64,13 @@ function Sidebar({ onFilterChange }) {
             console.log("WebSocket not connected");
             return;
         }
-
+        console.log("Đang search user là " + searchQuery)
+        onSearchChat(searchQuery)
+        sendMessage(SocketRequests.checkUserExist(searchQuery))
         // further implementation here
 
     }
+
 
     const handeJoinRoom = (e) => {
         e.preventDefault();
@@ -89,15 +91,15 @@ function Sidebar({ onFilterChange }) {
                 <div className="side-bar">
                     <h1 className="name">Chat Conversation</h1>
                     <div className="buttonSide">
-                        <form className="d-flex search" role="search" onSubmit={handleCreateRoom}>
+                        <form className="d-flex search" role="search" onSubmit={handleSearch}>
                             <input 
                                 className="form-control me-2" 
                                 type="text" 
                                 style={{ width: "80%" }} 
                                 placeholder={chooseRoom ? "Nhập tên room" : "Search"} 
                                 aria-label="Search"
-                                value={roomName}
-                                onChange={(e) => setRoomName(e.target.value)}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                             />
 
                             <button className="btn btn-outline-success" type="submit">Search</button>

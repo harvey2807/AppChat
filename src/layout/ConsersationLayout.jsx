@@ -26,10 +26,39 @@ function ConsersationLayout() {
     const [page, setPage] = useState(1);
     const selectedChatRef = useRef(null);
     const [reloginError, setReloginError] = useState(false)
-
+    const [userList, setUserList] = useState([])
+    const searchedChatRef = useRef(null);
 
     const handleFilterChange = (type) => {
         setFilterType(type);
+    };
+
+    const handleSearchChat = (username) => {
+        searchedChatRef.current = username;
+    };
+    const saveChat = (chatList) => {
+        let existedChatList = [];
+
+        try {
+            existedChatList = JSON.parse(
+                localStorage.getItem("CHATLIST") || "[]"
+            );
+        } catch (e) {
+            console.error("CHATLIST bị lỗi, reset lại");
+            existedChatList = [];
+        }
+
+        const result = [
+            ...existedChatList,
+            ...chatList.filter(
+                item2 =>
+                    !existedChatList.some(item1 => item1.name === item2.name)
+            )
+        ];
+
+        console.log("Danh sach all chat la:", result);
+
+        localStorage.setItem("CHATLIST", JSON.stringify(result));
     };
     useEffect(() => {
         if (!isAuth) navigate("/login");
@@ -83,7 +112,10 @@ function ConsersationLayout() {
         );
     };
 
-
+    function findUserByUsername(chatList, username) {
+        console.log("Cần tìm user " + username + "ở trong list là ", chatList)
+        return chatList.find(user => user.name === username) || null;
+    }
     useEffect(() => {
         const handler = (e) => {
             const msg = e.detail;
@@ -103,6 +135,7 @@ function ConsersationLayout() {
                 case "GET_USER_LIST":
                     // CHỈ set lần đầu khi chưa có chat nào được chọn
                     if (!selectedChatRef.current && msg.data.length > 0) {
+                        saveChat(msg.data)
                         const listUser = msg.data.filter(x => x.name !== user)
 
                         setSelectedChat(listUser[0]);
@@ -111,7 +144,7 @@ function ConsersationLayout() {
                     break;
                 case "SEND_CHAT":
                     if (!selectedChat) return;
-                    console.log(selectedChat)
+                    console.log("Da có tin nhắn gửi đến " + msg.data)
                     if (msg.status === "success") {
                         if (msg.data.name === selectedChat.name) {
                             if (msg.data.type === 0) {
@@ -169,6 +202,30 @@ function ConsersationLayout() {
                         );
                     });
                     break;
+
+                case "CHECK_USER_EXIST":
+                    if (msg.status === "success") {
+                        if (msg.data.status === true) {
+                            const existedChatList = JSON.parse(
+                                localStorage.getItem("CHATLIST") || "[]"
+                            );
+                            const user = findUserByUsername(existedChatList, searchedChatRef.current)
+                            if (user) {
+                                setRoom(user.type === 1);
+                                setSelectedChat(user)
+                            }
+                        } else {
+                            const existedChatList = JSON.parse(
+                                localStorage.getItem("CHATLIST") || "[]"
+                            );
+                            const user = findUserByUsername(existedChatList, searchedChatRef.current)
+                            if (user) {
+                                setRoom(user.type === 1);
+                                setSelectedChat(user)
+                            }
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -202,12 +259,15 @@ function ConsersationLayout() {
                             </div>
                             {showChatList && (
                                 <div className='chat-left-content'>
-                                    <Sidebar onFilterChange={handleFilterChange} />
+                                    <Sidebar
+                                        onFilterChange={handleFilterChange}
+                                        onSearchChat={handleSearchChat} />
                                     <ListMess
                                         onSelectChat={setSelectedChat}
                                         filter={filterType}
                                         setRoom={setRoom}
-                                        setShowChatList={setShowChatList} />
+                                        setShowChatList={setShowChatList}
+                                        onUserList={setUserList} />
                                 </div>
                             )}
                         </div>
@@ -236,12 +296,15 @@ function ConsersationLayout() {
                         <div className='chat-left'>
                             <button className="chat-icon" onClick={() => setShowChatList(true)} />
                             <div className='chat-left-content'>
-                                <Sidebar onFilterChange={handleFilterChange} />
+                                <Sidebar
+                                    onFilterChange={handleFilterChange}
+                                    onSearchChat={handleSearchChat} />
                                 <ListMess
                                     onSelectChat={setSelectedChat}
                                     filter={filterType}
                                     setRoom={setRoom}
-                                    setShowChatList={setShowChatList} />
+                                    setShowChatList={setShowChatList}
+                                    onUserList={setUserList} />
                             </div>
 
                         </div>

@@ -5,8 +5,8 @@ import { useEffect } from 'react';
 import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
 
-function ListMess({ onSelectChat, filter, setRoom, setShowChatList }) {
-    const { users, onlineStatus, lastMessages } = useChatList();
+function ListMess({ onSelectChat, filter, setRoom, setShowChatList, onUserList }) {
+    const { users, onlineStatus, lastMessages } = useChatList(onUserList);
     // 2. Logic lọc danh sách dựa trên filter
     const filteredUsers = users.filter((user) => {
         if (filter === 'all') {

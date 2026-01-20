@@ -3,7 +3,7 @@ import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
 import { useAuth } from '../../../context/AuthContext';
 
-export const useChatList = () => {
+export const useChatList = (onUserList) => {
     const { isConnected, sendMessage, isAuthenticated } = useWebSocket();
     const [users, setUsers] = useState([]);
     const [onlineStatus, setOnlineStatus] = useState({});
@@ -137,6 +137,7 @@ export const useChatList = () => {
                 if (Array.isArray(data)) {
                     const listUser = data.filter(x => x.name !== currentUser)
                     setUsers(listUser);
+                    onUserList(listUser);
                 }
                 break;
 

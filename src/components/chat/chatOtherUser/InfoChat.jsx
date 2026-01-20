@@ -18,29 +18,39 @@ function InfoChat({ room, chat, mess, listMemberInRoom }) {
     const username = localStorage.getItem("USER")
     const { logout } = useAuth()
     const { disconnect } = useWebSocket();
+    const [images, setImages] = useState([]);
+    const [fileList, setFileList] = useState([])
 
     const changeMedia = () => {
         if (choseMedia === 0) setChoseMedia(1)
         else setChoseMedia(0)
         console.log(choseMedia)
     }
-    const [images, setImages] = useState([]);
 
     const isCloudinaryImage = (text) =>
-        text.startsWith("https://res.cloudinary.com/")
+        text.startsWith("https://res.cloudinary.com/appchatnlu/image/")
+
+    const isCloudinaryFile = (text) => text.startsWith("https://res.cloudinary.com/appchatnlu/raw/")
 
     useEffect(() => {
         const imgs = mess
-            ?.map(m => m.mes)
+            .map(m => m.mes)
             .filter(isCloudinaryImage) || [];
 
         setImages(imgs);
+
+        const files = mess.map(m => m.mes).filter(isCloudinaryFile) || [];
+        setFileList(files)
     }, [mess]);
 
-    const files = ["filetest.txt",
-        "bikieptangai.pdf",
-        "cuu_am_chan_kinh.pdf"
-    ]
+    const getFileName = (url) => {
+        return url.split('/').pop()
+    }
+    const downloadFile = (url) => {
+        const downloadUrl = url.replace('/upload/', '/upload/fl_attachment/');
+        window.open(downloadUrl, '_blank');
+    };
+
 
     const { theme, toggleTheme } = useContext(ThemeContext)
 
@@ -135,11 +145,12 @@ function InfoChat({ room, chat, mess, listMemberInRoom }) {
                                             style={
                                                 { visibility: choseMedia === 1 ? "visible" : "hidden" }
                                             }>
-                                            {files.map((filename) => (
+                                            {fileList.map((filename) => (
                                                 <div key={filename} className="file">
                                                     <div className="file-icon"></div>
-                                                    <p className='file-name'>{filename}</p>
+                                                    <p className='file-name'>{getFileName(filename)}</p>
                                                     <button className="download-btn"
+                                                        onClick={() => downloadFile(filename)}
                                                         style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
                                                 </div>
                                             ))}
@@ -229,11 +240,12 @@ function InfoChat({ room, chat, mess, listMemberInRoom }) {
                                         style={
                                             { visibility: choseMedia === 1 ? "visible" : "hidden" }
                                         }>
-                                        {files.map((filename) => (
+                                        {fileList.map((filename) => (
                                             <div key={filename} className="file">
                                                 <div className="file-icon"></div>
-                                                <p className='file-name'>{filename}</p>
+                                                <p className='file-name'>{getFileName(filename)}</p>
                                                 <button className="download-btn"
+                                                    onClick={() => downloadFile(filename)}
                                                     style={{ backgroundImage: theme === "light" ? `url(${downloadDarkBtn})` : `url(${downloadLightBtn})` }} />
                                             </div>
                                         ))}
