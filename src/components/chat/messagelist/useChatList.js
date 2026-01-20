@@ -3,7 +3,7 @@ import { useWebSocket } from '../../../context/WebSocketContext';
 import { SocketRequests } from '../../../hooks/useWebSocket';
 import { useAuth } from '../../../context/AuthContext';
 
-export const useChatList = () => {
+export const useChatList = (onUserList) => {
     const { isConnected, sendMessage, isAuthenticated } = useWebSocket();
     const [users, setUsers] = useState([]);
     const [onlineStatus, setOnlineStatus] = useState({});
@@ -60,13 +60,10 @@ export const useChatList = () => {
             users.forEach((user) => {
                 if (user.name) {
                     checkQueueRef.current.push(user.name);
-
-
                     sendMessage(SocketRequests.checkUserOnline(user.name));
 
                     const recentUsers = [...users]
                         .sort((a, b) => new Date(b.actionTime) - new Date(a.actionTime))
-                    // console.log("user", recentUsers)
                     messageQueueRef.current = recentUsers;
 
                 }
@@ -140,6 +137,7 @@ export const useChatList = () => {
                 if (Array.isArray(data)) {
                     const listUser = data.filter(x => x.name !== currentUser)
                     setUsers(listUser);
+                    onUserList(listUser);
                 }
                 break;
 
@@ -163,41 +161,6 @@ export const useChatList = () => {
                     }
                 }
                 break;
-
-            // case "GET_PEOPLE_CHAT_MES":
-            //     const peopleMessages = data;
-            //     if (Array.isArray(peopleMessages) && peopleMessages.length > 0) {
-            //         const sorted = [...peopleMessages].sort((a, b) =>
-            //             new Date(b.createAt) - new Date(a.createAt)
-            //         );
-            //         const lastMsg = sorted[0];
-            //         const key = lastMsg.name === currentUser ? lastMsg.to : lastMsg.name;
-
-            //         console.log(`Last message from ${key}: "${lastMsg.mes}"`);
-            //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-            //     }
-
-            //     isProcessingQueueRef.current = false;
-            //     setTimeout(processNextMessage, 100);
-            //     break;
-
-            // case "GET_ROOM_CHAT_MES":
-            //     const roomMessages = data?.chatData;
-            //     if (Array.isArray(roomMessages) && roomMessages.length > 0) {
-            //         const sorted = [...roomMessages].sort((a, b) =>
-            //             new Date(b.createAt) - new Date(a.createAt)
-            //         );
-            //         const lastMsg = sorted[0];
-            //         const key = lastMsg.to;
-
-            //         console.log(`Room ${key}: "${lastMsg.mes}"`);
-            //         setLastMessages((prev) => ({ ...prev, [key]: lastMsg }));
-            //     }
-
-            //     isProcessingQueueRef.current = false;
-            //     setTimeout(processNextMessage, 100);
-            //     break;
-
 
             // default:
             //     if (!["LOGIN", "RE_LOGIN", "AUTH"].includes(event)) {

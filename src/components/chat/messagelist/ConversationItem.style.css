@@ -31,3 +31,16 @@ a{
     white-space: nowrap;
     text-overflow: ellipsis;
 }
+a:focus .user-name{
+    color: black !important;
+}
+.list-group-item-action:not(.active):focus,
+.list-group-item-action:not(.active):hover{
+    background-color: var(--chose-btn);
+}
+
+.list-group-item-action:not(.active):focus h6,
+.list-group-item-action:not(.active):hover h6
+{
+    color: white !important;
+}

@@ -18,11 +18,9 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
-
-
-
     const { sendMessage, isConnected } = useWebSocket();
     const { user } = useAuth();
+
     const srcUser = useAuth().user?.username || "";
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
@@ -42,33 +40,17 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const thresholdTop = 20;
         const thresholdBottom = 50;
 
-        // 👇 CHỈ ghi scrollHeight khi sắp load thêm
+        // CHỈ ghi scrollHeight khi sắp load thêm
         if (el.scrollTop <= thresholdTop) {
             prevScrollHeightRef.current = el.scrollHeight;
             onLoadMore(); // gọi CHA
-            return; // ⛔ QUAN TRỌNG: dừng luôn
+            return; //  QUAN TRỌNG: dừng luôn
         }
 
-        // 👇 chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
+        //chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
         isAtBottomRef.current =
             el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
     };
-
-    // useEffect(() => {
-    //     if (!chat) return;
-    //     // if(!isActive(chat.name, chat.type)) return;
-    //     // console.log("Chat đang active : " + isActive(chat.name, chat.type))
-
-    //     const interval = setInterval(() => {
-    //         if (chat.type === 1) {
-    //             sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
-    //         } else {
-    //             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
-    //         }
-    //     }, 1000); // 2 giây
-
-    //     return () => clearInterval(interval);
-    // }, [chat]);
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
@@ -79,7 +61,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const el = chatContainerRef.current;
         if (!el) return;
 
-        // 1️⃣ Load thêm tin cũ → giữ vị trí
+        // Load thêm tin cũ → giữ vị trí
         if (prevScrollHeightRef.current > 0) {
             el.scrollTop =
                 el.scrollHeight - prevScrollHeightRef.current;
@@ -87,7 +69,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             return;
         }
 
-        // 2️⃣ User đang ở đáy → auto scroll
+        // User đang ở đáy → auto scroll
         if (isAtBottomRef.current) {
             el.scrollTop = el.scrollHeight;
         }
@@ -105,7 +87,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
 
-        if (!isAtBottomRef.current) return; // 👈 QUAN TRỌNG
+        if (!isAtBottomRef.current) return; // QUAN TRỌNG
 
         bottomRef.current.scrollIntoView({ behavior: "auto" });
     }, [mess, chat, isConnected]);
@@ -116,9 +98,6 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const resourceType = isImage ? "image" : "raw";
 
         formData.append("file", file)
-        // nameFile = file.name;
-        // formData.append("use_filename", "true")
-        // formData.append("unique_filename", "true")
         // formData.append("overwrite", "false")
         formData.append("upload_preset", "chat_unsigned")
 
@@ -141,7 +120,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const data = await response.json()
         console.log("Form data", formData)
         return data.secure_url
-    }
+    }   
 
 
     const handleInput = () => {
@@ -163,7 +142,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             setUploading(true)
             sendNude();
             textareaRef.current.value = "";
-            textareaRef.current.style.height = "40px";
+            textareaRef.current.style.height = "30px";
             setUploading(false)
         }
     };
@@ -191,10 +170,6 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         setUploading(true)
 
         console.log("Send message:", text);
-        // FOR TESTING PURPOSES ONLY
-        // dstUser = "tttt" // REMOVE THIS LINE IN PRODUCTION
-        // dstRoom = "room1" // REMOVE THIS LINE IN PRODUCTION
-
         const imageUrl = await handleSendImage(selectedFile)
         console.log("Kiểm tra có trong room hay chưa: " + isInRoom + '-' + room)
         console.log("Gửi ảnh: " + imageUrl)
@@ -235,8 +210,8 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             sendMessage(packet);
             sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
         } else if (!room) {
-
             const packet = SocketRequests.sendToPeople(chat.name, encodeEmoji(msgText));
+
             console.log("Sending packet:", packet);
             // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
@@ -376,19 +351,6 @@ function Message(msg, room) {
         return (
             <div key={msg.id} className="message me">
                 <div className="message-content">
-                    {/* {isCloudinaryImage(msg.mes) ? (
-                        <img
-                            //at here we need to check if msg.mes is image or file
-                            //and render accordingly
-                            src={msg.mes}
-                            alt="chat-img"
-                            style={{ maxWidth: 240, borderRadius: 8 }}
-                        />
-                    ) : (
-                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
-                        <p>{msg.mes}</p>
-                    )} */}
-
                     {isCloudinaryImage(msg.mes) ? (
                         getCloudinaryFileType(msg.mes) === "image" ? (
                             <img
@@ -426,7 +388,8 @@ function Message(msg, room) {
                                     style={{ maxWidth: 240, borderRadius: 8 }}
                                 />
                             ) : (//how to display UI for file message
-                                <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                // <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                <a href={msg.mes} download target="_blank" rel="noopener noreferrer">
                                     {getCloudinaryFileName(msg.mes) || "Download File"}
                                 </a>
                             )
@@ -533,32 +496,6 @@ function FilePicker({ onSelect }) {
     )
 }
 
-// function FilePreview({ file }) {
-//     const [preview, setPreview] = useState(null)
-
-//     useEffect(() => {
-//         if (!file) return
-
-//         const url = URL.createObjectURL(file)
-//         setPreview(url)
-
-//         return () => URL.revokeObjectURL(url)
-//     }, [file])
-
-//     if (!preview) return null
-
-//     return (
-//         <div className='file-preview'>
-//             <button className='remove-file'>x</button>
-//             <img
-//                 src={preview}
-//                 alt="preview"
-//                 style={{ maxWidth: 200, borderRadius: 8 }}
-//             />
-//         </div>
-//     )
-
-// }
 function FilePreview({ file, onRemove }) {
     const [preview, setPreview] = useState(null)
 
@@ -590,13 +527,13 @@ function FilePreview({ file, onRemove }) {
 
     return (
         <div className='file-preview-card'>
-            {/* Nút xóa */}
+            {}
             <button className='remove-file-btn' onClick={() => onRemove && onRemove(null)}>
                 ✕
             </button>
 
             {isImage ? (
-                /* Giao diện cho ẢNH */
+                
                 <div className="preview-image-container">
                     <img
                         src={preview}
@@ -609,7 +546,7 @@ function FilePreview({ file, onRemove }) {
                     </div>
                 </div>
             ) : (
-                /* Giao diện cho FILE KHÁC (PDF, DOC, ETC.) */
+                
                 <div className="preview-file-container">
                     <div className="file-icon">
                         {/* Icon tượng trưng (Dùng SVG inline cho gọn) */}

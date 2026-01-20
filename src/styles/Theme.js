@@ -9,6 +9,7 @@ export const lightTheme = {
   "--bg-time-send": "rgba(0, 0, 0, 0.5)",
   "--text-time-send": "#ffffff",
   "--chose-btn": "#198754",
+  "--focus-chat": "#8dde6f"
 };
 
 export const darkTheme = {
@@ -21,4 +22,5 @@ export const darkTheme = {
   "--bg-time-send": "#ffffff",
   "--text-time-send": "#111111",
   "--chose-btn": "#198754",
+  "--focus-chat": "#8dde6f"
 };
