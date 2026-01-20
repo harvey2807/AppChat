@@ -24,9 +24,9 @@ function ConversationItem({ user, isOnline, lastMessage, onClick }) {
                     </div>
                 </div>
                 <div className="component-right d-flex flex-column align-items-end">
-                    <small className="colorMessage mb-1">
+                    {/* <small className="colorMessage mb-1">
                         {formatTime(lastMessage?.createAt)}
-                    </small>
+                    </small> */}
                     <div className={`status-dot ${isOnline ? 'online' : 'offline'}`}></div>
                 </div>
             </div>

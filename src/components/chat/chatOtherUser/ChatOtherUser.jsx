@@ -12,15 +12,15 @@ import { SocketRequests } from "../../../hooks/useWebSocket";
 
 const userName = localStorage.getItem("USER")
 
+let nameFile = "";  
 function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
     const MAX_HEIGHT = 140
-
-
     const { sendMessage, isConnected } = useWebSocket();
     const { user } = useAuth();
+
     const srcUser = useAuth().user?.username || "";
     const [uploading, setUploading] = useState(false);
     const [isImage, setIsImage] = useState(false);
@@ -40,33 +40,17 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const thresholdTop = 20;
         const thresholdBottom = 50;
 
-        // 👇 CHỈ ghi scrollHeight khi sắp load thêm
+        // CHỈ ghi scrollHeight khi sắp load thêm
         if (el.scrollTop <= thresholdTop) {
             prevScrollHeightRef.current = el.scrollHeight;
             onLoadMore(); // gọi CHA
-            return; // ⛔ QUAN TRỌNG: dừng luôn
+            return; //  QUAN TRỌNG: dừng luôn
         }
 
-        // 👇 chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
+        //chỉ cập nhật trạng thái đáy khi KHÔNG load thêm
         isAtBottomRef.current =
             el.scrollHeight - el.scrollTop - el.clientHeight < thresholdBottom;
     };
-
-    // useEffect(() => {
-    //     if (!chat) return;
-    //     // if(!isActive(chat.name, chat.type)) return;
-    //     // console.log("Chat đang active : " + isActive(chat.name, chat.type))
-
-    //     const interval = setInterval(() => {
-    //         if (chat.type === 1) {
-    //             sendMessage(SocketRequests.getRoomMessages(chat.name, 1));
-    //         } else {
-    //             sendMessage(SocketRequests.getPeopleMessages(chat.name, 1));
-    //         }
-    //     }, 1000); // 2 giây
-
-    //     return () => clearInterval(interval);
-    // }, [chat]);
 
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
@@ -77,7 +61,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         const el = chatContainerRef.current;
         if (!el) return;
 
-        // 1️⃣ Load thêm tin cũ → giữ vị trí
+        // Load thêm tin cũ → giữ vị trí
         if (prevScrollHeightRef.current > 0) {
             el.scrollTop =
                 el.scrollHeight - prevScrollHeightRef.current;
@@ -85,7 +69,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             return;
         }
 
-        // 2️⃣ User đang ở đáy → auto scroll
+        // User đang ở đáy → auto scroll
         if (isAtBottomRef.current) {
             el.scrollTop = el.scrollHeight;
         }
@@ -103,18 +87,24 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
     useLayoutEffect(() => {
         if (!bottomRef.current) return;
 
-        if (!isAtBottomRef.current) return; // 👈 QUAN TRỌNG
+        if (!isAtBottomRef.current) return; // QUAN TRỌNG
 
         bottomRef.current.scrollIntoView({ behavior: "auto" });
     }, [mess, chat, isConnected]);
 
     async function uploadImageToCloudinary(file) {
         const formData = new FormData()
+        const isImage = file.type.startsWith("image/");
+        const resourceType = isImage ? "image" : "raw";
+
         formData.append("file", file)
+        // formData.append("overwrite", "false")
         formData.append("upload_preset", "chat_unsigned")
 
+        console.log("Uploading image to Cloudinary...", file)
+
         const response = await fetch(
-            "https://api.cloudinary.com/v1_1/appchatnlu/image/upload",
+            `https://api.cloudinary.com/v1_1/appchatnlu/${resourceType}/upload`,
             {
                 method: "POST",
                 body: formData
@@ -122,13 +112,16 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         )
 
         if (!response.ok) {
-            throw new Error("Upload failed")
+            const errData = await response.json();
+            console.error("Cloudinary error:", errData);
+            throw new Error(errData.error?.message || "Upload failed");
         }
 
         const data = await response.json()
-
+        console.log("Form data", formData)
         return data.secure_url
-    }
+    }   
+
 
     const handleInput = () => {
         const el = textareaRef.current
@@ -149,7 +142,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             setUploading(true)
             sendNude();
             textareaRef.current.value = "";
-            textareaRef.current.style.height = "40px";
+            textareaRef.current.style.height = "30px";
             setUploading(false)
         }
     };
@@ -161,7 +154,8 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             setUploading(true)
 
             const imageUrl = await uploadImageToCloudinary(selectedFile)
-
+            // nameFile = getCloudinaryFileName(imageUrl)
+            console.log("Uploaded image URL:", nameFile)
             setSelectedFile(null)
             return imageUrl
         } catch (err) {
@@ -176,10 +170,6 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
         setUploading(true)
 
         console.log("Send message:", text);
-        // FOR TESTING PURPOSES ONLY
-        // dstUser = "tttt" // REMOVE THIS LINE IN PRODUCTION
-        // dstRoom = "room1" // REMOVE THIS LINE IN PRODUCTION
-
         const imageUrl = await handleSendImage(selectedFile)
         console.log("Kiểm tra có trong room hay chưa: " + isInRoom + '-' + room)
         console.log("Gửi ảnh: " + imageUrl)
@@ -221,6 +211,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
             sendMessage(SocketRequests.getRoomMessages(chat.name, 1))
         } else if (!room) {
             const packet = SocketRequests.sendToPeople(chat.name, encodeEmoji(msgText));
+
             console.log("Sending packet:", packet);
             // handleSendMessage(chat.name, chat.type, msgText)
             sendMessage(packet);
@@ -259,7 +250,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
                     })}
                     {/* Mốc để scroll */}
                     <div ref={bottomRef} />
-                    
+
                     {room && !isInRoom && (
 
                         <div className='error-box slide-up'>
@@ -271,12 +262,18 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
                 {selectedFile && (
                     <>
-                        <ImagePreview file={selectedFile} onRemoveImage={setSelectedFile} className="image-preview" />
+                        {selectedFile.type.startsWith("image/") ? (
+                            <ImagePreview file={selectedFile} onRemoveImage={setSelectedFile} className="image-preview" />
+                        ) : (
+                            <FilePreview file={selectedFile} className="file-preview" />
+                        )}
+
                     </>
                 )}
                 <div className="chat-input">
                     <ImagePicker onSelect={setSelectedFile} />
-                    <button className='file-btn' />
+                    <FilePicker onSelect={setSelectedFile} />
+                    {/* <button className='file-btn' /> */}
                     <div className="form-chat">
                         <textarea className="chat-text"
                             ref={textareaRef}
@@ -333,19 +330,37 @@ const decodeEmoji = (text) => {
 const isCloudinaryImage = (text) =>
     text.startsWith("https://res.cloudinary.com/")
 
+function getCloudinaryFileType(url) {
+    const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'svg'];
+    const ext = url.split('.').pop().toLowerCase();
+    // if(imageExts.some(r => url.endsWith(r))) return "image";
+    return imageExts.includes(ext) ? "image" : "raw"; //true if image, false if raw
+}
+
+function getCloudinaryFileName(url) {
+    const parts = url.split('/');
+    return parts[parts.length - 1].split('.')[0]; // returns file name without extension
+}
+
 function Message(msg, room) {
     if (msg.name === userName) {
         return (
             <div key={msg.id} className="message me">
                 <div className="message-content">
                     {isCloudinaryImage(msg.mes) ? (
-                        <img
-                            src={msg.mes}
-                            alt="chat-img"
-                            style={{ maxWidth: 240, borderRadius: 8 }}
-                        />
+                        getCloudinaryFileType(msg.mes) === "image" ? (
+                            <img
+                                src={msg.mes}
+                                alt="chat-img"
+                                style={{ maxWidth: 240, borderRadius: 8 }}
+                            />
+                        ) : (
+                            <a href={msg.mes} target="_blank" rel="noopener noreferrer">
+                                Download File
+                            </a>
+                        )
                     ) : (
-                        <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
+                        <p style={{ whiteSpace: 'pre-wrap' }}>{decodeEmoji(msg.mes)}</p>
                     )}
                     <span className="time-send">
                         {msg.createAt}
@@ -362,13 +377,19 @@ function Message(msg, room) {
                     {room && (<p className='sender-mess'>{msg.name} đã gửi tin nhắn</p>)}
                     <div className="message-content">
                         {isCloudinaryImage(msg.mes) ? (
-                            <img
-                                src={msg.mes}
-                                alt="chat-img"
-                                style={{ maxWidth: 240, borderRadius: 8 }}
-                            />
+                            getCloudinaryFileType(msg.mes) === "image" ? (
+                                <img
+                                    src={msg.mes}
+                                    alt="chat-img"
+                                    style={{ maxWidth: 240, borderRadius: 8 }}
+                                />
+                            ) : (//how to display UI for file message
+                                <a href={msg.mes} download target="_blank" rel="noopener noreferrer">
+                                    {getCloudinaryFileName(msg.mes) || "Download File"}
+                                </a>
+                            )
                         ) : (
-                            <p style={{whiteSpace: 'pre-wrap'}}>{decodeEmoji(msg.mes)}</p>
+                            <p style={{ whiteSpace: 'pre-wrap' }}>{decodeEmoji(msg.mes)}</p>
                         )}
                         <span className="time-send">
                             {msg.createAt}
@@ -439,6 +460,61 @@ function ImagePreview({ file, onRemoveImage }) {
     )
 }
 
+function FilePicker({ onSelect }) {
+    const inputImageRef = useRef(null)
 
+    const openFileDialog = () => {
+        inputImageRef.current.click()
+    }
 
+    const handleChange = (e) => {
+        const file = e.target.files[0]
+        if (file) {
+            onSelect(file)
+        }
+    }
+
+    return (
+        <>
+
+            <button onClick={openFileDialog}
+                className='file-btn' />
+
+            <input
+                ref={inputImageRef}
+                type="file"
+                accept="file/*"
+                hidden
+                onChange={handleChange}
+            />
+        </>
+    )
+}
+
+function FilePreview({ file }) {
+    const [preview, setPreview] = useState(null)
+
+    useEffect(() => {
+        if (!file) return
+
+        const url = URL.createObjectURL(file)
+        setPreview(url)
+
+        return () => URL.revokeObjectURL(url)
+    }, [file])
+
+    if (!preview) return null
+
+    return (
+        <div className='file-preview'>
+            <button className='remove-file'>x</button>
+            <img
+                src={preview}
+                alt="preview"
+                style={{ maxWidth: 200, borderRadius: 8 }}
+            />
+        </div>
+    )
+
+}
 export default ChatOtherUser

@@ -187,14 +187,15 @@
 
 .chat-text {
     width: 85%;
-    /* height: 76%; */
+    height: auto;
     resize: none;
     overflow: hidden;
     font-size: 100%;
     line-height: 1.4;
     border: solid 1px gray;
     border-radius: 15px;
-    padding: 8px;
+    padding: 4px 10px;
+    font-size: 15px;
 }
 
 .icon-btn {
@@ -277,6 +278,12 @@
     animation-delay: 0.4s;
 }
 
+textarea:focus {
+    outline: none;
+    border: solid 1px gray;
+    /* nếu bạn không muốn border luôn */
+}
+
 @keyframes sending {
 
     0%,
@@ -309,7 +316,7 @@
 
 @media (max-width: 992px) {
     .chat-box {
-        width: 95%;
+        width: 100%;
     }
 
     p,
@@ -319,5 +326,11 @@
 
     .time-send {
         font-size: 8px;
+    }
+
+    textarea:focus {
+        outline: none;
+        border: solid 1px gray;
+        /* nếu bạn không muốn border luôn */
     }
 }

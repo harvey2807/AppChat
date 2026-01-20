@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
     console.log("Login success, storing user and code in localStorage:", user, code);
     localStorage.setItem("USER", user);
     localStorage.setItem("RE_LOGIN_CODE", code);
+    localStorage.setItem("CHATLIST", []);
   };
 
   const logout = () => {

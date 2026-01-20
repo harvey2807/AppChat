@@ -95,12 +95,14 @@ p {
 .img {
     padding: 0 3px;
     margin-bottom: 6px;
-}   
+}
 
 img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 10px;
+    border: solid 2px green;
 }
 
 .file-box {
@@ -279,13 +281,15 @@ img {
     width: 100%;
 
 }
-.list-mem-box{
+
+.list-mem-box {
     width: 100%;
     display: flex;
     flex-direction: column;
     padding-left: 20px;
 }
-.mem-info{
+
+.mem-info {
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -300,11 +304,15 @@ img {
     .infor {
         display: none;
     }
+
     .sidebar {
-        width: 9%;
+        width: 5%;
         height: 80px;
         background-color: var(--bg);
         border-radius: 10px;
+        position: absolute;
+        right: 0;
+        top: 40px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -328,8 +336,15 @@ img {
     .info-u-btn {
         background-image: url("../../../assets/images/user.png");
     }
-    p, button{
+
+    p,
+    button {
         font-size: 10px;
     }
-
+    .inforOtherUserBoxMobile{
+        height: auto;
+    }
+    .media{
+        height: 300px;
+    }
 }
