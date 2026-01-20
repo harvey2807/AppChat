@@ -169,7 +169,6 @@ function ConsersationLayout() {
                     }
                     break;
                 case "SEND_CHAT":
-                    // if (!selectedChat) return;
                     console.log("Da có tin nhắn gửi đến ", msg.data)
                     if (msg.status === "success") {
                         if (msg.data.name === selectedChat.name) {
