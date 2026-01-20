@@ -66,8 +66,10 @@ function Sidebar({ onFilterChange, onSearchChat }) {
         }
         console.log("Đang search user là " + searchQuery)
         onSearchChat(searchQuery)
-        sendMessage(SocketRequests.checkUserExist(searchQuery))
         // further implementation here
+        const packet = SocketRequests.checkUserExist(searchQuery);
+        sendMessage(packet);
+        console.log("Sent packet:", packet);
 
     }
 
