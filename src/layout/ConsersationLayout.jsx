@@ -169,8 +169,7 @@ function ConsersationLayout() {
                     }
                     break;
                 case "SEND_CHAT":
-                    if (!selectedChat) return;
-                    console.log("Da có tin nhắn gửi đến " + msg.data)
+                    console.log("Da có tin nhắn gửi đến ", msg.data)
                     if (msg.status === "success") {
                         if (msg.data.name === selectedChat.name) {
                             if (msg.data.type === 0) {
@@ -220,7 +219,7 @@ function ConsersationLayout() {
                         return;
                     }
 
-                    const joined = Array.isArray(msg.data?.userList)
+                    const joined = Array.isArray(msg.data.userList)
                         && msg.data.userList.some(u => u.name === user);
                     setListMemberInRoom(msg.data.userList)
                     setIsInRoom(joined);
