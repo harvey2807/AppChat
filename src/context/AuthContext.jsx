@@ -27,6 +27,7 @@ export const AuthProvider = ({ children }) => {
     setReloginCode(code);
     console.log("Login success, storing user and code in localStorage:", user, code);
     localStorage.setItem("USER", user);
+
     localStorage.setItem("RE_LOGIN_CODE", code);
     localStorage.setItem("CHATLIST", []);
   };
@@ -36,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     setReloginCode(null);
     //why clear local storage here
     setIsAuth(false);
+    console.log("Logging out, clearing localStorage");
     localStorage.clear();
   };
 

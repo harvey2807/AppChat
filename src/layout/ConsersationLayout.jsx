@@ -214,7 +214,30 @@ function ConsersationLayout() {
                     setIsOnline(msg.data.status);
                     break;
                 case "GET_ROOM_CHAT_MES":
+                       const messOfRoom = msg.data.chatData.length ? msg.data.chatData : [];
+                    if (!messOfRoom || messOfRoom.length === 0) {
+                        setHasMore(false);
+                        return;
+                    }
 
+                    const joined = Array.isArray(msg.data?.userList)
+                        && msg.data.userList.some(u => u.name === user);
+                    setListMemberInRoom(msg.data.userList)
+                    setIsInRoom(joined);
+
+                    setListMessages(prev => {
+                        const map = new Map();
+
+                        // 1. merge + dedupe
+                        [...prev, ...messOfRoom].forEach(m => {
+                            map.set(m.id, m);
+                        });
+
+                        // 2. sort theo thời gian
+                        return Array.from(map.values()).sort(
+                            (a, b) => new Date(b.createAt) - new Date(a.createAt)
+                        );
+                    });
                     break;
 
                 case "CHECK_USER_EXIST":
@@ -236,6 +259,11 @@ function ConsersationLayout() {
                             if (user) {
                                 setRoom(user.type === 1);
                                 setSelectedChat(user)
+                                if (user.type === 1) {
+                                    sendMessage(SocketRequests.joinRoom(user.name))
+                                    setIsInRoom(true);
+                                    console.log("Đã gửi yêu cầu tham gia room " + user.name)
+                                }
                             }
                         }
                     }
