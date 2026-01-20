@@ -33,6 +33,137 @@
     color: var(--text);
 }
 
+.status-dot {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 10px;
+    border: 2px solid white;
+    transition: background-color 0.3s ease;
+}
+
+/* Màu khi Online */
+.status-dot.online {
+    background-color: #0cff5d;
+    box-shadow: 0 0 5px #0cff5d;
+}
+
+/* Màu khi Offline */
+.status-dot.offline {
+    background-color: #adb5bd;
+}
+
+/* Container chung của thẻ preview */
+.file-preview-card {
+    position: relative;
+    width: 200px;
+    background-color: #f8f9fa;
+    /* Màu nền nhẹ */
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Nút xóa (X) */
+.remove-file-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+
+.remove-file-btn:hover {
+    background: rgba(255, 0, 0, 0.7);
+}
+
+/* --- Style cho ẢNH --- */
+.preview-image-container {
+    width: 100%;
+    height: 150px;
+    position: relative;
+}
+
+.preview-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Giúp ảnh luôn lấp đầy khung mà không bị méo */
+}
+
+.file-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    color: white;
+    padding: 20px 8px 8px;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Style cho FILE THƯỜNG --- */
+.preview-file-container {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    gap: 12px;
+    height: 80px;
+    /* Chiều cao cố định cho file thường */
+}
+
+.file-icon svg {
+    width: 40px;
+    height: 40px;
+    color: #6c757d;
+    /* Màu icon xám */
+}
+
+.file-details {
+    flex: 1;
+    overflow: hidden;
+    /* Để cắt chữ nếu tên quá dài */
+}
+
+.file-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Hiện dấu ... nếu tên dài */
+    margin: 0;
+}
+
+.file-size {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0 0 0;
+}
+
+a {
+    color: white;
+}
+
 .theme-btn {
     width: 30px;
     height: 30px;

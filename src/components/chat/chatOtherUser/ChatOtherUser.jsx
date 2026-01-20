@@ -12,8 +12,8 @@ import { SocketRequests } from "../../../hooks/useWebSocket";
 
 const userName = localStorage.getItem("USER")
 
-let nameFile = "";  
-function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive }) {
+
+function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, onLoadMore, isActive, isOnline }) {
     const textareaRef = useRef(null)
     const [text, setText] = useState("")
     const [showPicker, setShowPicker] = useState(false)
@@ -155,7 +155,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
             const imageUrl = await uploadImageToCloudinary(selectedFile)
             // nameFile = getCloudinaryFileName(imageUrl)
-            console.log("Uploaded image URL:", nameFile)
+            // console.log("Uploaded image URL:", nameFile)
             setSelectedFile(null)
             return imageUrl
         } catch (err) {
@@ -237,6 +237,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
                     <div className="chat-box-header">
                         <button className='avt' />
                         <p className='user-name'>{chat !== null ? chat.name : "User"}</p>
+                        <span className={`status-dot ${isOnline ? 'online' : 'offline'}`}></span>
                         <button className='theme-btn'
                             onClick={toggleTheme}
                             style={{ backgroundImage: theme === "light" ? `url(${DarkTheme})` : `url(${LightTheme})` }} />
@@ -262,14 +263,17 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
 
                 {selectedFile && (
                     <>
-                        {selectedFile.type.startsWith("image/") ? (
-                            <ImagePreview file={selectedFile} onRemoveImage={setSelectedFile} className="image-preview" />
-                        ) : (
-                            <FilePreview file={selectedFile} className="file-preview" />
-                        )}
+                        {
+                            selectedFile.type.startsWith("image/") ? (
+                                <ImagePreview file={selectedFile} className="image-preview" />
+                            ) : (
+                                <FilePreview file={selectedFile} onRemove={setSelectedFile} className="file-preview" />
+                            )
+                        }
 
                     </>
-                )}
+                )
+                }
                 <div className="chat-input">
                     <ImagePicker onSelect={setSelectedFile} />
                     <FilePicker onSelect={setSelectedFile} />
@@ -308,7 +312,7 @@ function ChatOtherUser({ room, chat, mess, setListMessages, isInRoom, hasMore, o
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
         </>
     )
 }
@@ -384,6 +388,7 @@ function Message(msg, room) {
                                     style={{ maxWidth: 240, borderRadius: 8 }}
                                 />
                             ) : (//how to display UI for file message
+                                // <a href={msg.mes} target="_blank" rel="noopener noreferrer">
                                 <a href={msg.mes} download target="_blank" rel="noopener noreferrer">
                                     {getCloudinaryFileName(msg.mes) || "Download File"}
                                 </a>
@@ -491,30 +496,72 @@ function FilePicker({ onSelect }) {
     )
 }
 
-function FilePreview({ file }) {
+function FilePreview({ file, onRemove }) {
     const [preview, setPreview] = useState(null)
 
+    // Helper: Format dung lượng file (KB/MB)
+    const formatFileSize = (bytes) => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
     useEffect(() => {
-        if (!file) return
+        if (!file) return;
 
-        const url = URL.createObjectURL(file)
-        setPreview(url)
+        // Chỉ tạo URL preview nếu là ảnh
+        if (file.type.startsWith("image/")) {
+            const url = URL.createObjectURL(file);
+            setPreview(url);
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setPreview(null);
+        }
+    }, [file]);
 
-        return () => URL.revokeObjectURL(url)
-    }, [file])
+    if (!file) return null;
 
-    if (!preview) return null
+    const isImage = file.type.startsWith("image/");
 
     return (
-        <div className='file-preview'>
-            <button className='remove-file'>x</button>
-            <img
-                src={preview}
-                alt="preview"
-                style={{ maxWidth: 200, borderRadius: 8 }}
-            />
+        <div className='file-preview-card'>
+            {}
+            <button className='remove-file-btn' onClick={() => onRemove && onRemove(null)}>
+                ✕
+            </button>
+
+            {isImage ? (
+                
+                <div className="preview-image-container">
+                    <img
+                        src={preview}
+                        alt="preview"
+                        className="preview-img"
+                    />
+                    <div className="file-info-overlay">
+                        <span className="file-name">{file.name}</span>
+                        <span className="file-size">{formatFileSize(file.size)}</span>
+                    </div>
+                </div>
+            ) : (
+                
+                <div className="preview-file-container">
+                    <div className="file-icon">
+                        {/* Icon tượng trưng (Dùng SVG inline cho gọn) */}
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M14 2H6C4.89543 2 4 2.89543 4 4V20C4 21.1046 4.89543 22 6 22H18C19.1046 22 20 21.1046 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            <path d="M14 2V8H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                    </div>
+                    <div className="file-details">
+                        <p className="file-name" title={file.name}>{file.name}</p>
+                        <p className="file-size">{formatFileSize(file.size)}</p>
+                    </div>
+                </div>
+            )}
         </div>
     )
-
 }
 export default ChatOtherUser
